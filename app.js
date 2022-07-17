@@ -67,13 +67,12 @@ app.use((req, res, next) => {
 });
 
 /** 
- * function to start the server.
+ * function to create server.
  * 
  * @param { void }
  * @return { void } 
  */
-
-function startServer(){
+function runServer(){
     try{
         app.listen(PORT || 3000);
         console.info(`${ NODE_ENV } server is up and running on PORT: ${ PORT }.`);
@@ -83,5 +82,6 @@ function startServer(){
     }
 }
 
+
 // exporting functions
-module.exports = startServer();
+module.exports = () => { runServer() };
