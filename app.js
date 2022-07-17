@@ -5,6 +5,9 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 
+// importing configurations
+const { NODE_ENV, PORT } = require('./configs/index');
+
 // app
 const app = express();
 
