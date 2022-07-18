@@ -1,7 +1,7 @@
 // importing modules
 const cluster = require('cluster')
 const os = require('os')
-const runServer = require('../app')
+const runServer = require('./app');
 
 // condition to check if current process is master.
 if (cluster.isMaster) {
