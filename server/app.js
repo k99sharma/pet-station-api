@@ -5,14 +5,17 @@ const morgan = require('morgan')
 const helmet = require('helmet')
 const cors = require('cors')
 
+// configuring environment variables
+require('dotenv').config()
+
 // importing configurations
 const { NODE_ENV, PORT } = require('./configs/index')
 
 // app
 const app = express()
 
-// configuring environment variables
-require('dotenv').config()
+// configuring database connection
+require('./configs/dbConnection');
 
 // setting up middleware
 app.use(compression()) // compression middleware
@@ -58,7 +61,7 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Credentials', true)
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE')
 
-    next()
+    next();
 })
 
 /**
@@ -69,14 +72,14 @@ app.use((req, res, next) => {
  */
 function runServer() {
     try {
-        app.listen(PORT || 3000)
-        console.info(`${NODE_ENV} server is up and running on PORT: ${PORT}.`)
+        app.listen(PORT || 3000);
+        console.info(`${NODE_ENV} server is up and running on PORT: ${PORT}.`);
     } catch (err) {
-        console.info('Error in running server.')
+        console.info('Error in running server.');
     }
 }
 
 // exporting functions
 module.exports = () => {
-    runServer()
+    runServer();
 }
