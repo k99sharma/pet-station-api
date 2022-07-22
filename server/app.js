@@ -11,6 +11,9 @@ require('dotenv').config()
 // importing configurations
 const { NODE_ENV, PORT } = require('./configs/index')
 
+// importing error handlers
+const { notFound, sendErrors } = require('./configs/errorHandlers');
+
 // app
 const app = express()
 
@@ -49,7 +52,10 @@ if (NODE_ENV === 'production')
 
 // setting up routes
 
+app.use('*', notFound)      // route not found
+
 // error handlers
+app.use(sendErrors)
 
 // allowing headers
 app.use((req, res, next) => {
