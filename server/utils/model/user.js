@@ -6,7 +6,7 @@
  * @return { String } function returns new unique user ID 
  */
 
-function uniqueIdGenerator(firstName, lastName){
+ function uniqueIdGenerator(firstName, lastName){
     const prefix = 'usr';
 
     // if first name and last name both are undefined
@@ -19,6 +19,8 @@ function uniqueIdGenerator(firstName, lastName){
     lastName = lastName != undefined ? lastName : '';
 
     const joinedName = lastName + firstName;
+
+    // generate a 6 digit random number
     const randomNumber = '_' + Math.floor(100000 + Math.random() * 900000);
 
     return prefix + joinedName + randomNumber;

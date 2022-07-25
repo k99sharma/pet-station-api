@@ -1,6 +1,5 @@
 // importing functions
-const { model } = require('mongoose');
-const modelHelper = require('../server/utilities/modelHelper');
+const modelHelper = require('../server/utils/model/user');
 
 
 /**

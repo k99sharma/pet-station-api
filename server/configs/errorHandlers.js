@@ -1,11 +1,11 @@
 // import error helper functions
-const { sendError } = require('../utilities/errorHelper');
+const { sendError } = require('../utils/errorHelper');
 
 // import status codes
 const {
     NOT_FOUND,
     SERVER_ERROR
-} = require('../utilities/statusCodes');
+} = require('../utils/statusCodes');
 
 
 /**
