@@ -8,7 +8,8 @@
         "format:check": "prettier --check .",
         "format:write": "prettier --write .",
         "lint:check": "eslint .",
-        "lint:fix": "eslint --fix ."
+        "lint:fix": "eslint --fix .",
+        "test": "jest"
     },
     "repository": {
         "type": "git",
@@ -34,6 +35,7 @@
     "devDependencies": {
         "eslint": "^8.20.0",
         "grunt": "^1.5.3",
+        "jest": "^28.1.3",
         "prettier": "^2.7.1"
     }
 }
