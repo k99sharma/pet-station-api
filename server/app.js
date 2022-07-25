@@ -51,6 +51,9 @@ if (NODE_ENV === 'production')
     console.log = console.warn = console.error = () => {}
 
 // setting up routes
+app.use('/petstation/user', require('../server/routes/user'));      // user route
+
+app.use('/petstation/test', require('../server/routes/test'));     // test route
 
 app.use('*', notFound)      // route not found
 

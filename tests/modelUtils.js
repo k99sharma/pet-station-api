@@ -31,3 +31,20 @@ describe('function to generate unique id for users', ()=>{
         }).toThrow('First name and Last name cannot be undefined');
     });
 });
+
+/**
+ * tests for hash generator function.
+ * 
+ * function returns hash based on provided length.
+ */
+
+ describe('function to generate hash based on different length', ()=>{
+    const lengths = [10, 5, 0, 233, 100];
+
+    for(const length of lengths){
+        test(`hash code for ${length} length`, ()=>{
+            const receivedLength = modelHelper.hashGenerator(length).length;
+            expect(receivedLength).toEqual(length);
+        });
+    }
+});

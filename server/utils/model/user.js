@@ -1,9 +1,9 @@
 /**
  * function to create unique user ID
  * 
- * @params { String, String } function takes first name and last name as parameter
+ * @params { String, String } function takes first name and last name as parameter.
  * 
- * @return { String } function returns new unique user ID 
+ * @return { String } function returns new unique user ID.
  */
 
  function uniqueIdGenerator(firstName, lastName){
@@ -26,6 +26,41 @@
     return prefix + joinedName + randomNumber;
 }
 
+/**
+ * function to generate hash
+ * 
+ * @params { Number } function takes length as parameter.
+ * 
+ * @return { String } function returns hash string.
+ */
+
+function hashGenerator(length){
+    // string containing [0-9, a-z, A-Z,_];
+    const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_';
+    let hash = '';
+
+    for(let i=0; i<length; i++)
+        hash += chars[Math.round(Math.random() * (chars.length-1))];
+
+    return hash;
+}
+
+/**
+ * function to generate username
+ * 
+ * @params { String } function takes first name as parameter.
+ * 
+ * @return { String } function returns username
+ */
+
+function usernameGenerator(firstName){
+    const randomNumber = Math.floor(100000 + Math.random() * 900000);
+
+    return firstName + randomNumber;
+}
+
 module.exports = {
-    uniqueIdGenerator
+    uniqueIdGenerator,
+    hashGenerator,
+    usernameGenerator
 }
