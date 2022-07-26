@@ -11,5 +11,6 @@ module.exports = {
     FORBIDDEN: 403, 
     NOT_FOUND: 404,
     NOT_ACCEPTABLE: 406,
-    SERVER_ERROR: 500
+    CONFLICT: 409,
+    SERVER_ERROR: 500,
 };

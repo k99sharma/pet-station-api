@@ -3,16 +3,15 @@ const User = require('../models/User');
 
 // importing error handlers
 const {
-    // sendError,
-    sendSuccess
+    sendSuccess, 
+    sendError
 } = require('../utils/errorHelper');
 
+
 // importing status codes
-// const {
-//     OK,
-//     BAD_REQUEST,
-//     NOT_FOUND
-// } = require('../utils/statusCodes');
+const {
+    CONFLICT
+} = require('../utils/statusCodes');
 
 
 // POST: create a new user
@@ -25,7 +24,16 @@ const createUser = async (req, res) => {
         street, city, state, country, zipCode 
     } = req.body;
 
-    let newUser = new User({
+    // if user exists do not create new user
+    let user = await User.findOne({
+        email: email
+    });
+    
+    if(user)
+        return sendError(res, 'User already exists.', CONFLICT);
+
+    // creating new user model
+    const newUser = new User({
         firstName: firstName.toLowerCase(),
         lastName: lastName.toLowerCase(),
         gender: gender.toLowerCase(),
@@ -40,9 +48,10 @@ const createUser = async (req, res) => {
         }
     });
 
+    // save user in database
     await newUser.save();
 
-    return sendSuccess(res, newUser);
+    return sendSuccess(res, 'User successfully created.');
 }
 
 module.exports = {
