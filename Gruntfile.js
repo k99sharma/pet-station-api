@@ -1,1 +1,0 @@
-// TODO: grunt tasks for linter and prettier

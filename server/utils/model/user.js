@@ -54,6 +54,11 @@ function hashGenerator(length){
  */
 
 function usernameGenerator(firstName){
+    // if first name is not given
+    if(firstName == undefined)
+        throw 'First name cannot be undefined';
+
+    // generate 6-digit random number
     const randomNumber = Math.floor(100000 + Math.random() * 900000);
 
     return firstName + randomNumber;
@@ -62,5 +67,5 @@ function usernameGenerator(firstName){
 module.exports = {
     uniqueIdGenerator,
     hashGenerator,
-    usernameGenerator
+    usernameGenerator,
 }

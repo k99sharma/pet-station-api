@@ -4,6 +4,14 @@ const Schema = mongoose.Schema;
 
 // login detail schema
 const loginDetailSchema = new Schema({
+    userId: {
+        type: Schema.Types.ObjectId,
+        required: true
+    },
+    clientMachineInformation: {
+        type: Object,
+        required: true
+    },
     lastLogin: {
         type: Date,
         default: Date.now,
@@ -15,14 +23,15 @@ const loginDetailSchema = new Schema({
         required: true
     },
     lastFailedLogin: {
-        type: Date
+        type: Date,
     },
     lastPasswordUpdate: {
         type: Date,
         default: Date.now,
         required: true
-    },
-    timestamp: true
+    }
+},{
+    timestamps: true
 });
 
 

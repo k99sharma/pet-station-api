@@ -48,3 +48,27 @@ describe('function to generate unique id for users', ()=>{
         });
     }
 });
+
+/**
+ * tests for username generator
+ * 
+ * function returns username based on first name.
+ */
+
+ describe('function to generate username based on first name', ()=>{
+    test(`username for user with Sam as first name`, ()=>{
+        const received = modelHelper.usernameGenerator('sam');
+        expect(received).toMatch(/sam\d{6}/);
+    });
+
+    test(`username for user with Cassie as first name`, ()=>{
+        const received = modelHelper.usernameGenerator('cassie');
+        expect(received).toMatch(/cassie\d{6}/);
+    });
+
+    test(`username for user with no first name`, ()=>{
+        expect(() => {
+            modelHelper.usernameGenerator()
+        }).toThrow('First name cannot be undefined');
+    });
+});
