@@ -187,7 +187,6 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
     createUser,
-    changeUsername,
     getUserByEmail,
     getUserByUserId,
     isUserValid,
