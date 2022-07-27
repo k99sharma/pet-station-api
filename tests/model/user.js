@@ -1,5 +1,5 @@
 // importing functions
-const modelHelper = require('../server/utils/model/user');
+const modelHelper = require('../../server/utils/model/user');
 
 
 /**

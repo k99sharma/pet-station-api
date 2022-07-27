@@ -122,7 +122,7 @@ userSchema.pre('save', async function(next){
     // creating new username model
     let newUsername = new Username({
         username: username,
-        userId: this._id
+        userId: this.userId
     });
 
     // save username
