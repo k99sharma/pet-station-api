@@ -29,6 +29,9 @@ router.get('/getUserById', catchErrors(CONTROLLERS.getUserByUserId));
 // GET: check if user exists using email address
 router.get('/validUser', catchErrors(CONTROLLERS.isUserValid));
 
+// GET: get all users using offset and limit
+router.get('/getAllUsers', catchErrors(CONTROLLERS.getAllUsers));
+
 // PUT: update user data
 router.put('/update/:type/:userId', catchErrors(CONTROLLERS.updateUser));
 

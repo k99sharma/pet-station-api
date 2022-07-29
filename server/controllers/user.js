@@ -1,6 +1,5 @@
 // importing model
 const User = require('../models/User');
-const Username = require('../models/Username');
 
 // importing error handlers
 const {
@@ -22,7 +21,7 @@ const createUser = async (req, res) => {
         gender,
         email,
         password,
-        street, city, state, country, zipCode
+        street, region, country, postalZip
     } = req.body;
 
     // if user exists do not create new user
@@ -42,10 +41,9 @@ const createUser = async (req, res) => {
         password: password.toLowerCase(),
         address: {
             street: street.toLowerCase(),
-            city: city.toLowerCase(),
-            state: state.toLowerCase(),
+            region: region.toLowerCase(),
             country: country.toLowerCase(),
-            zipCode: zipCode.toLowerCase()
+            postalZip: postalZip.toLowerCase()
         }
     });
 
@@ -185,10 +183,30 @@ const deleteUser = async (req, res) => {
     return sendSuccess(res, 'User deleted.', UPDATED);
 }
 
+// GET: get all user using offset and limit
+const getAllUsers = async (req, res) => {
+    // getting limit and offset query parameter
+    const { limit, offset } = req.query;
+
+    // total count of users in database
+    const userCount = await User.estimatedDocumentCount();
+    if(offset >= userCount)
+        return sendSuccess(res, 'No user found.');
+
+    // creating a query
+    const query = User.find().sort('userId').skip(offset).limit(limit);
+
+    // executing query
+    const data = await query.exec();
+
+    res.send(sendSuccess(res, data));
+}
+
 module.exports = {
     createUser,
     getUserByEmail,
     getUserByUserId,
+    getAllUsers,
     isUserValid,
     updateUser,
     deleteUser

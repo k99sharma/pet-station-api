@@ -55,11 +55,7 @@ const userSchema = new Schema({
             type: String,
             required: true
         },
-        city: {
-            type: String,
-            required: true
-        },
-        state: {
+        region: {
             type: String,
             required: true
         },
@@ -67,7 +63,7 @@ const userSchema = new Schema({
             type: String,
             required: true
         },
-        zipCode: {
+        postalZip: {
             type: String,
             required: true
         }
