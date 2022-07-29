@@ -14,6 +14,8 @@ const {
 } = require('../utils/statusCodes');
 
 
+// importing helper function
+
 // POST: create a new user
 const createUser = async (req, res) => {
     const {
@@ -113,7 +115,7 @@ const isUserValid = async (req, res) => {
 
     const user = await User.findOne({ email: email });
 
-    if(!user || !user.active)
+    if (!user || !user.active)
         return sendSuccess(res, false, NOT_FOUND);
 
     return sendSuccess(res, true);
@@ -129,13 +131,13 @@ const updateUser = async (req, res) => {
 
     // check if user id is valid
     const user = await User.findOne({ userId: userId });
-    if(!user || !user.active)
+    if (!user || !user.active)
         return sendError(res, 'Invalid User.', NOT_FOUND);
 
     let updatedData = {};
 
     // data based on type
-    switch(type){
+    switch (type) {
         case 'firstName':
             updatedData = { firstName: data.firstName };
             break;
@@ -146,7 +148,7 @@ const updateUser = async (req, res) => {
 
         case 'address':
             updatedData = { address: data.address };
-            break; 
+            break;
 
         case 'gender':
             updatedData = { address: data.gender };
@@ -157,7 +159,7 @@ const updateUser = async (req, res) => {
     }
 
     // if no data is present
-    if(Object.keys(data).length == 0)
+    if (Object.keys(data).length == 0)
         return sendError(res, 'Data not found.', BAD_REQUEST);
 
     // update data
@@ -174,7 +176,7 @@ const deleteUser = async (req, res) => {
 
     // check if user exists
     const user = await User.findOne({ userId: userId });
-    if(!user || user.active)
+    if (!user || user.active)
         return sendError(res, 'Invalid User.', NOT_FOUND);
 
     // make user inactive
@@ -183,23 +185,66 @@ const deleteUser = async (req, res) => {
     return sendSuccess(res, 'User deleted.', UPDATED);
 }
 
-// GET: get all user using offset and limit
+// GET: get all user using cursor and limit
 const getAllUsers = async (req, res) => {
-    // getting limit and offset query parameter
-    const { limit, offset } = req.query;
+    // get all the query parameter
+    const limit = parseInt(req.query.limit);    // convert into Number
+    const cursor = req.query.cursor;
+ 
+    let userCollection; // store query result
 
-    // total count of users in database
-    const userCount = await User.estimatedDocumentCount();
-    if(offset >= userCount)
-        return sendSuccess(res, 'No user found.');
+    // if cursor is present
+    if (cursor) {
+        // decrypt the cursor using decryption function
+        const decryptedCursor = cursor;
+        
+        // convert decrypted value into date format
+        const decryptedDate = new Date(decryptedCursor * 1000);
+        
+        // query for users according to cursor
+        userCollection = await User.find({
+            createdAt: {
+                $lt: decryptedDate
+            },
+        })
+            .sort({ createdAt: -1 })        // descending order
+            .limit(limit + 1)               // getting +1 of what we need
+    } 
+    else {
+        // if cursor is not present 
+        userCollection = await User.find({})
+            .sort({ createdAt: -1 })
+            .limit(limit + 1)
+    }
 
-    // creating a query
-    const query = User.find().sort('userId').skip(offset).limit(limit);
+    // checking if there are more documents
+    const hasMore = userCollection.length === limit + 1;
+    let nextCursor = null;
 
-    // executing query
-    const data = await query.exec();
+    // if limit is reached
+    if (hasMore) {
+        // getting last record from query result
+        // needed to find nextCursor and send it in response
+        const nextCursorRecord = userCollection[limit];
 
-    res.send(sendSuccess(res, data));
+
+        var unixTimestamp = Math.floor(nextCursorRecord.createdAt.getTime() / 1000); 
+        
+        // encrypt cursor 
+        nextCursor = unixTimestamp.toString();  
+
+        // removing last record from users data
+        userCollection.pop();
+    }
+
+    // sending response
+    return sendSuccess(res, {
+        data: userCollection,
+        paging: {
+            hasMore,
+            nextCursor
+        }
+    });
 }
 
 module.exports = {
