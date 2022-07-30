@@ -6,5 +6,6 @@ module.exports = {
                 process.env.MONGO_URI_PROD 
                 : 
                 process.env.MONGO_URI_DEV,
-    JWT_PRIVATE_KEY: 'iamkalashsharma'
+    JWT_PRIVATE_KEY: 'iamkalashsharma',
+    ENCRYPT_KEY: process.env.ENCRYPT_KEY,
 }

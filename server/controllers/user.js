@@ -15,6 +15,10 @@ const {
 
 
 // importing helper function
+const {
+    encrypt,
+    decrypt
+} = require('../utils/helper');
 
 // POST: create a new user
 const createUser = async (req, res) => {
@@ -196,8 +200,8 @@ const getAllUsers = async (req, res) => {
     // if cursor is present
     if (cursor) {
         // decrypt the cursor using decryption function
-        const decryptedCursor = cursor;
-        
+        const decryptedCursor = decrypt(cursor);
+
         // convert decrypted value into date format
         const decryptedDate = new Date(decryptedCursor * 1000);
         
@@ -227,11 +231,10 @@ const getAllUsers = async (req, res) => {
         // needed to find nextCursor and send it in response
         const nextCursorRecord = userCollection[limit];
 
-
         var unixTimestamp = Math.floor(nextCursorRecord.createdAt.getTime() / 1000); 
         
         // encrypt cursor 
-        nextCursor = unixTimestamp.toString();  
+        nextCursor = encrypt(unixTimestamp.toString());  
 
         // removing last record from users data
         userCollection.pop();
