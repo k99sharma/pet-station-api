@@ -10,7 +10,7 @@ const {
 
 // importing status codes
 const {
-    CONFLICT, NOT_FOUND, UPDATED, BAD_REQUEST
+    CONFLICT, NOT_FOUND, BAD_REQUEST
 } = require('../utils/statusCodes');
 
 
@@ -169,7 +169,7 @@ const updateUser = async (req, res) => {
     // update data
     await User.findOneAndUpdate({ userId: userId }, updatedData);
 
-    return sendSuccess(res, 'Update successful.', UPDATED);
+    return sendSuccess(res, 'Update successful.');
 }
 
 // DELETE: delete user using user id
@@ -186,7 +186,7 @@ const deleteUser = async (req, res) => {
     // make user inactive
     await User.findOneAndUpdate({ userId: userId }, { active: false });
 
-    return sendSuccess(res, 'User deleted.', UPDATED);
+    return sendSuccess(res, 'User deleted.');
 }
 
 // GET: get all user using cursor and limit

@@ -52,6 +52,7 @@ if (NODE_ENV === 'production')
 
 // setting up routes
 app.use('/petstation/user', require('../server/routes/user'));      // user route
+app.use('/petstation/username', require('../server/routes/username'));       // username route
 app.use('/petstation/test', require('../server/routes/routeTest'));     // test route
 
 app.use('*', notFound)      // route not found
