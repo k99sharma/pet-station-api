@@ -1,6 +1,3 @@
 # SITE Configuration
 
-baseurl: ""
-layout: default
 theme: jekyll-theme-cayman
-title: Pet Station API
