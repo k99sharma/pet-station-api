@@ -1,2 +1,5 @@
+# SITE Configuration
+
+baseurl: ""
 theme: jekyll-theme-midnight
 title: Pet Station API
