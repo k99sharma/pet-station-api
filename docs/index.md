@@ -2,4 +2,4 @@
 layout: default
 ---
 
-Sample text.
+Still in development.
