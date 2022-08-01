@@ -15,6 +15,7 @@ const CONTROLLERS = require('../controllers/user');
  * Get user using email address.
  * Get user using user Id
  * Check if user is valid or not
+ * Get user login details
  */
 
 // POST: create a new user
@@ -31,6 +32,9 @@ router.get('/validUser', catchErrors(CONTROLLERS.isUserValid));
 
 // GET: get all users using offset and limit
 router.get('/getAllUsers', catchErrors(CONTROLLERS.getAllUsers));
+
+// GET: get login details
+router.get('/logindetails/:userId', catchErrors(CONTROLLERS.getLoginDetails));
 
 // PUT: update user data
 router.put('/update/:type/:userId', catchErrors(CONTROLLERS.updateUser));

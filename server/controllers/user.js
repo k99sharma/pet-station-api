@@ -1,5 +1,6 @@
 // importing model
 const User = require('../models/User');
+const LoginDetail = require('../models/LoginDetail');
 
 // importing error handlers
 const {
@@ -172,6 +173,18 @@ const updateUser = async (req, res) => {
     return sendSuccess(res, 'Update successful.');
 }
 
+// GET: login details
+const getLoginDetails = async (req, res) => {
+    const userId = req.params.userId; 
+
+    const loginRecord = await LoginDetail.findOne({ userId: userId });
+
+    if(!loginRecord)
+        return sendError(res, 'No login details found.', NOT_FOUND);
+
+    return sendSuccess(res, loginRecord);
+}
+
 // DELETE: delete user using user id
 
 const deleteUser = async (req, res) => {
@@ -256,6 +269,7 @@ module.exports = {
     getUserByUserId,
     getAllUsers,
     isUserValid,
+    getLoginDetails,
     updateUser,
     deleteUser
 };

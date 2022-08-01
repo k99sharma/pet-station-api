@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 // login detail schema
 const loginDetailSchema = new Schema({
     userId: {
-        type: Schema.Types.ObjectId,
+        type: String,
         required: true
     },
     clientMachineInformation: {
@@ -18,7 +18,7 @@ const loginDetailSchema = new Schema({
         required: true
     },
     lastFailedCount: {
-        type: Number,
+        type: String,
         default: 0,
         required: true
     },

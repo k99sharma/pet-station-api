@@ -52,7 +52,6 @@ const adminAuth = (req, res, next) => {
     }
 };
 
-
 module.exports = {
     allAuth,
     adminAuth
