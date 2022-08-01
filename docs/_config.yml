@@ -2,5 +2,5 @@
 
 baseurl: ""
 layout: default
-theme: jekyll-theme-midnight
+theme: jekyll-theme-cayman
 title: Pet Station API
