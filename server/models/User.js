@@ -131,15 +131,17 @@ userSchema.pre('save', async function(next){
 
 // method to check if password is valid
 userSchema.methods.isValidPassword = async function(userPassword){
-    const isMatch = await bcrypt.compare(this.password, userPassword);
-
-    return isMatch;
+    try {
+        return await bcrypt.compare(userPassword, this.password);
+    } catch (error) {
+        throw new Error (error);
+    }
 }
 
 // method to generate authentication token
 userSchema.methods.generateAuthToken = function(){
     const token = jwt.sign({
-        name: `${this.firstName} ${this.lastName}`,
+        userId: this.userId,
         email: this.email,
         role: this.admin ? 'admin' : 'notAdmin'
     },
