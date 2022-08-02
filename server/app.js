@@ -12,13 +12,17 @@ require('dotenv').config()
 const { NODE_ENV, PORT } = require('./configs/index')
 
 // importing error handlers
-const { notFound, sendErrors } = require('./configs/errorHandlers');
+const { notFound, sendErrors } = require('./configs/errorHandlers')
 
 // app
 const app = express()
 
 // configuring database connection
-require('./configs/dbConnection');
+require('./configs/dbConnection')
+
+// configuring redis connection
+const { connectRedis } = require('./configs/redisConnection')
+connectRedis()
 
 // setting up middleware
 app.use(compression()) // compression middleware
@@ -51,11 +55,12 @@ if (NODE_ENV === 'production')
     console.log = console.warn = console.error = () => {}
 
 // setting up routes
-app.use('/petstation/user', require('../server/routes/user'));      // user route
-app.use('/petstation/username', require('../server/routes/username'));       // username route
-app.use('/petstation/test', require('../server/routes/routeTest'));     // test route
+app.use('/petstation/user', require('../server/routes/user')) // user route
+app.use('/petstation/username', require('../server/routes/username')) // username route
+app.use('/petstation', require('../server/routes/auth'))
+app.use('/petstation/test', require('../server/routes/routeTest')) // test route
 
-app.use('*', notFound)      // route not found
+app.use('*', notFound) // route not found
 
 // error handlers
 app.use(sendErrors)
@@ -70,7 +75,7 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Credentials', true)
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE')
 
-    next();
+    next()
 })
 
 /**
@@ -81,14 +86,14 @@ app.use((req, res, next) => {
  */
 function runServer() {
     try {
-        app.listen(PORT || 3000);
-        console.info(`${NODE_ENV} server is up and running on PORT: ${PORT}.`);
+        app.listen(PORT || 3000)
+        console.info(`${NODE_ENV} server is up and running on PORT: ${PORT}.`)
     } catch (err) {
-        console.info('Error in running server.');
+        console.info('Error in running server.')
     }
 }
 
 // exporting functions
 module.exports = () => {
-    runServer();
+    runServer()
 }
