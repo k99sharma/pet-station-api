@@ -8,10 +8,14 @@ const {
     sendError
 } = require('../utils/errorHelper');
 
+// creating redis client
+const { getClient } = require('../configs/redisConnection');
+const client = getClient();
+
 
 // importing status codes
 const {
-    CONFLICT, NOT_FOUND, BAD_REQUEST, FORBIDDEN
+    FORBIDDEN
 } = require('../utils/statusCodes');
 
 
@@ -89,6 +93,10 @@ const userLogin = async (req, res) => {
 
     const generatedToken = await user.generateAuthToken();
 
+    // adding value in redis cache
+    await client.set(generatedToken, 'true');
+    client.expire(generatedToken, 60*60*24*7);  // setting token expiration
+
     return sendSuccess(res, 'Login Successful.', generatedToken);
 }
 
@@ -101,6 +109,10 @@ const extendToken = async (req, res) => {
 
     // generate new token
     const generatedToken = await user.generateAuthToken();
+
+    // adding value in redis cache
+    await client.set(generatedToken, 'true');
+    client.expire(generatedToken, 60*60*24*7);  // setting token expiration
 
     return sendSuccess(res, 'Token extended.', generatedToken);
 }

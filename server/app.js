@@ -20,6 +20,10 @@ const app = express()
 // configuring database connection
 require('./configs/dbConnection');
 
+// configuring redis connection
+const { connectRedis } = require('./configs/redisConnection');
+connectRedis();
+
 // setting up middleware
 app.use(compression()) // compression middleware
 app.use(morgan('dev')) // morgan middleware
