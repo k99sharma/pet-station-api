@@ -131,7 +131,8 @@ const isUserValid = async (req, res) => {
 
 const updateUser = async (req, res) => {
     // getting data type and userId
-    const { type, userId } = req.params;
+    const userId = req.user.userId;
+    const { type } = req.params;
     const data = req.body;
 
     // check if user id is valid
@@ -189,7 +190,7 @@ const getLoginDetails = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     // get user id from params
-    const userId = req.params.userId;
+    const userId = req.user.userId;
 
     // check if user exists
     const user = await User.findOne({ userId: userId });

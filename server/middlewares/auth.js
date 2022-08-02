@@ -1,6 +1,9 @@
 // importing modules
 const jwt = require('jsonwebtoken');
 
+// importing defined constants
+const { JWT_PRIVATE_KEY } = require('../configs/index');
+
 // importing error helpers
 const { sendError } = require('../utils/errorHelper');
 
@@ -21,16 +24,16 @@ const allAuth = (req, res, next) => {
         );
 
     // decoding payload
-    const decodePayload = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+    let decodedPayload;
 
-    // check if token expired
-    const expirationDate = decodePayload.expirationDate;
-    const todayDate = new Date();
-    if(expirationDate.compareTo(todayDate) < 0)
-            return sendError(res, 'Token Expired.', NOT_AUTHORIZED);
+    try{
+        decodedPayload = jwt.verify(token, JWT_PRIVATE_KEY)
+    }
+    catch(err){
+        return sendError(res, err, NOT_AUTHORIZED)
+    }
 
-    req.user = decodePayload;
-
+    req.user = decodedPayload;
     return next();
 }
 
@@ -48,21 +51,22 @@ const adminAuth = (req, res, next) => {
         );
 
     // decoding payload
-    const decodePayload = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
-
-    // check if token expired
-    const expirationDate = decodePayload.expirationDate;
-    const todayDate = new Date();
-    if(expirationDate.compareTo(todayDate) < 0)
-            return sendError(res, 'Token Expired.', NOT_AUTHORIZED);
-
-    // checking if user is admin 
-    if(decodePayload.admin === 'admin'){
-        req.user = decodePayload;
-        return next();
-    }else{
-        return sendError(res, "Forbidden", NOT_AUTHORIZED);
+    let decodedPayload;
+    
+    try{
+        decodedPayload= jwt.verify(token, JWT_PRIVATE_KEY);
     }
+    catch(err){
+        return sendError(res, err, NOT_AUTHORIZED);
+    }
+
+    // check for admin
+    if(decodedPayload.role === 'admin'){
+        req.user = decodedPayload;
+        return next();
+    }
+
+    return sendError(res, 'Forbidden', NOT_AUTHORIZED);
 };
 
 module.exports = {

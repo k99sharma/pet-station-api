@@ -32,7 +32,7 @@ const checkUsername = async (req, res) => {
 
 // PUT: change username
 const changeUsername = async (req, res) => {
-    const userId = req.params.userId;
+    const userId = req.user.userId;
     const newUsername = req.body.username;
 
     // check if user exists
