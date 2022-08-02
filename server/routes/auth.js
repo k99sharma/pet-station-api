@@ -21,7 +21,7 @@ const CONTROLLERS = require('../controllers/auth');
 router.post('/login', catchErrors(CONTROLLERS.userLogin));
 
 // POST: user logout
-router.post('/logout', catchErrors(CONTROLLERS.userLogout));
+router.post('/logout/:token', catchErrors(CONTROLLERS.userLogout));
 
 // GET: token extend
 router.get('/token/extend', catchErrors(CONTROLLERS.extendToken));

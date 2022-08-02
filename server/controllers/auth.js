@@ -15,6 +15,7 @@ const client = getClient();
 
 // importing status codes
 const {
+    SERVER_ERROR,
     FORBIDDEN
 } = require('../utils/statusCodes');
 
@@ -119,7 +120,17 @@ const extendToken = async (req, res) => {
 
 // POST: user logout
 const userLogout = async (req, res) => {
+    const token = req.params.token;
 
+    // delete token from redis
+    await client.del(token, (err, res)=>{
+        if(err){
+            console.log(err);
+            return sendError(res, 'Logout failed!', SERVER_ERROR);
+        }
+    });
+
+    return sendSuccess(res, 'Logout successful.');
 }
 
 module.exports = {
