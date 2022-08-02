@@ -15,7 +15,7 @@ const { getClient } = require('../configs/redisConnection');
 const client = getClient();
 
 // authentication for all users
-const allAuth = (req, res, next) => {
+const allAuth = async (req, res, next) => {
     // getting token
     const token = req.header("x-auth-token");
 
@@ -28,7 +28,8 @@ const allAuth = (req, res, next) => {
         );
 
     // check if token is in cache or not
-    if (client.get(token) !== 'true')
+    const isAvailable = await client.get(token);
+    if (isAvailable !== 'true')
         return sendError(res, 'Access Denied. Invalid token.', NOT_AUTHORIZED);
 
     // decoding payload
@@ -46,7 +47,7 @@ const allAuth = (req, res, next) => {
 }
 
 // authentication for admin
-const adminAuth = (req, res, next) => {
+const adminAuth = async (req, res, next) => {
     // getting token
     const token = req.header("x-auth-token");
 
@@ -58,8 +59,10 @@ const adminAuth = (req, res, next) => {
             NOT_AUTHORIZED
         );
 
+
     // check if token is in cache or not
-    if (client.get(token) !== 'true')
+    const isAvailable = await client.get(token);
+    if (isAvailable !== 'true')
         return sendError(res, 'Access Denied. Invalid token.', NOT_AUTHORIZED);
 
     // decoding payload
