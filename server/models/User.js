@@ -140,9 +140,13 @@ userSchema.methods.isValidPassword = async function(userPassword){
 
 // method to generate authentication token
 userSchema.methods.generateAuthToken = function(){
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 7);
+
     const token = jwt.sign({
         userId: this.userId,
         email: this.email,
+        exp: expirationDate, 
         role: this.admin ? 'admin' : 'notAdmin'
     },
         JWT_PRIVATE_KEY

@@ -22,6 +22,13 @@ const allAuth = (req, res, next) => {
 
     // decoding payload
     const decodePayload = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+
+    // check if token expired
+    const expirationDate = decodePayload.expirationDate;
+    const todayDate = new Date();
+    if(expirationDate.compareTo(todayDate) < 0)
+            return sendError(res, 'Token Expired.', NOT_AUTHORIZED);
+
     req.user = decodePayload;
 
     return next();
@@ -42,6 +49,12 @@ const adminAuth = (req, res, next) => {
 
     // decoding payload
     const decodePayload = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+
+    // check if token expired
+    const expirationDate = decodePayload.expirationDate;
+    const todayDate = new Date();
+    if(expirationDate.compareTo(todayDate) < 0)
+            return sendError(res, 'Token Expired.', NOT_AUTHORIZED);
 
     // checking if user is admin 
     if(decodePayload.admin === 'admin'){

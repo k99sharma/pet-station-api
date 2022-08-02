@@ -92,6 +92,19 @@ const userLogin = async (req, res) => {
     return sendSuccess(res, 'Login Successful.', generatedToken);
 }
 
+// GET: token extend i.e send new token
+const extendToken = async (req, res) => {
+    const userId = req.user.userId;
+
+    // get user 
+    const user = await User.findOne({ userId: userId });
+
+    // generate new token
+    const generatedToken = await user.generateAuthToken();
+
+    return sendSuccess(res, 'Token extended.', generatedToken);
+}
+
 // POST: user logout
 const userLogout = async (req, res) => {
 
@@ -99,5 +112,6 @@ const userLogout = async (req, res) => {
 
 module.exports = {
     userLogin,
-    userLogout
+    userLogout,
+    extendToken
 }

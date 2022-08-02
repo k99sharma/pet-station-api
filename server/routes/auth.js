@@ -14,6 +14,7 @@ const CONTROLLERS = require('../controllers/auth');
  * Login route.
  * Signup route.
  * Logout route.
+ * Token Extension route.
  */
 
 // POST: user login 
@@ -21,5 +22,8 @@ router.post('/login', catchErrors(CONTROLLERS.userLogin));
 
 // POST: user logout
 router.post('/logout', catchErrors(CONTROLLERS.userLogout));
+
+// GET: token extend
+router.get('/token/extend', catchErrors(CONTROLLERS.extendToken));
 
 module.exports = router;
