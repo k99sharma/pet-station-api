@@ -1,13 +1,19 @@
 // importing modules
 const nodemailer = require('nodemailer');
 
-// async..await is not allowed in global scope, must use a wrapper
-async function main() {
-    // Generate test SMTP service account from ethereal.email
-    // Only needed if you don't have a real mail account for testing
-    // let testAccount = await nodemailer.createTestAccount();
+// importing configurations
+const {
+    EMAIL_ADDRESS,
+    EMAIL_PASSWORD
+} = require('../../configs/index');
 
-
+/**
+ * Functions to send email.
+ * Email can be modified based on provided options.
+ * 
+ * @param { object } options 
+ */
+async function emailMain(options) {
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -15,23 +21,24 @@ async function main() {
         port: 465,
         secure: true,
         auth: {
-            user: 'petstationorg@gmail.com', // generated ethereal user
-            pass: 'fbjjjsldawxwpwwz', // generated ethereal password
+            user: EMAIL_ADDRESS, // generated ethereal user
+            pass: EMAIL_PASSWORD, // generated ethereal password
         },
     });
 
     // send mail with defined transport object
     let info = await transporter.sendMail({
         from: '"Pet Station Org"<petstationOrg@gmail.com>', // sender address
-        to: "kalash.strt@gmail.com", // list of receivers
-        subject: "Test ✔", // Subject line
-        text: "Welcome to pet station", // plain text body
+        to: options.mailTo, // list of receivers
+        subject: options.subject, // Subject line
+        text: options.text, // plain text body
     });
 
-    console.log("Message sent: %s", info.messageId);
+    console.log(info);
 }
 
 
+// exporting function
 module.exports = {
-    main
+    emailMain
 }
