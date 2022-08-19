@@ -14,7 +14,6 @@ const { allAuth, adminAuth } = require('../middlewares/auth')
 /**
  * Provided routes for user
  *
- * Create a new user.
  * Get user using email address. -> admin
  * Get user using user Id -> all
  * Check if user is valid or not -> admin
@@ -23,8 +22,6 @@ const { allAuth, adminAuth } = require('../middlewares/auth')
  * Delete user details. -> all
  */
 
-// POST: create a new user
-router.post('/create', catchErrors(CONTROLLERS.createUser))
 
 // GET: user using email address
 router.get(
