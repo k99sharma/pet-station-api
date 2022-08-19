@@ -12,6 +12,9 @@ const client = getClient()
 // importing status codes
 const { SERVER_ERROR, FORBIDDEN } = require('../utils/statusCodes')
 
+// importing services
+const { emailService } = require('../services/email/service');
+
 // POST: user login
 const userLogin = async (req, res) => {
     // getting request body
@@ -87,6 +90,24 @@ const userLogin = async (req, res) => {
     // adding value in redis cache
     await client.set(generatedToken, 'true')
     client.expire(generatedToken, 60 * 60 * 24 * 7) // setting token expiration
+
+    // send email to client
+    const data = {
+        name: {
+            firstName: user.firstName,
+            lastName: user.lastName
+        },
+        email: user.email
+    }
+    
+    const serviceResponse = await emailService('login', data);
+
+    if(serviceResponse.error){
+        // TODO: Need to handle unsent emails
+        console.log('Email cannot be sent!');
+    }else{
+        console.log(serviceResponse.msg);
+    }
 
     return sendSuccess(res, 'Login Successful.', generatedToken)
 }
