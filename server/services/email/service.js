@@ -55,10 +55,9 @@ async function emailMain(options) {
  * Different Templates are used based on different cases.
  * 
  * case 1: login
- * case 2: logout
+ * case 2: signup
  * case 3: email Verification v1.2
  * case 4: password reset v1.2
- * case 5: signup
  * 
  * @params { String, Object } case number, userData
  * @returns { Object } result
@@ -71,11 +70,6 @@ async function emailService(caseId, userData){
         options.mailTo = userData.email;
         options.subject = 'User logged in.',
         options.text = 'Pet station log in.'
-    }
-    else if(caseId === 'logout'){
-        options.mailTo = userData.email;
-        options.subject = 'User logout.';
-        options.text = 'Pet Station logout.';
     }
     else if(caseId === 'signup'){
         options.mailTo = userData.email;
