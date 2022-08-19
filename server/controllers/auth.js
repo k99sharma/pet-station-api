@@ -10,10 +10,72 @@ const { getClient } = require('../configs/redisConnection')
 const client = getClient()
 
 // importing status codes
-const { SERVER_ERROR, FORBIDDEN } = require('../utils/statusCodes')
+const { SERVER_ERROR, FORBIDDEN, CONFLICT } = require('../utils/statusCodes')
 
 // importing services
 const { emailService } = require('../services/email/service');
+
+// POST: user signup
+const userSignup = async (req, res) => {
+    const {
+        firstName,
+        lastName,
+        gender,
+        email,
+        password,
+        street,
+        region,
+        country,
+        postalZip,
+    } = req.body
+
+    // if user exists do not create new user
+    let user = await User.findOne({
+        email: email,
+    })
+
+    if (user) return sendError(res, 'User already exists.', CONFLICT)
+
+    // creating new user model
+    const newUser = new User({
+        firstName: firstName.toLowerCase(),
+        lastName: lastName.toLowerCase(),
+        gender: gender.toLowerCase(),
+        email: email,
+        password: password.toLowerCase(),
+        address: {
+            street: street.toLowerCase(),
+            region: region.toLowerCase(),
+            country: country.toLowerCase(),
+            postalZip: postalZip.toLowerCase(),
+        },
+    })
+
+    // save user in database
+    await newUser.save()
+
+    // send email to client
+    // TODO: this email is supposed to be confirmation email
+    const data = {
+        name: {
+            firstName: newUser.firstName,
+            lastName: newUser.lastName
+        },
+        email: newUser.email
+    }
+
+    const serviceResponse = await emailService('signup', data);
+
+    if (serviceResponse.error) {
+        // TODO: Need to handle unsent emails
+        console.log('Email cannot be sent!');
+    } else {
+        console.log(serviceResponse.msg);
+    }
+
+
+    return sendSuccess(res, 'User successfully created.')
+}
 
 // POST: user login
 const userLogin = async (req, res) => {
@@ -99,13 +161,13 @@ const userLogin = async (req, res) => {
         },
         email: user.email
     }
-    
+
     const serviceResponse = await emailService('login', data);
 
-    if(serviceResponse.error){
+    if (serviceResponse.error) {
         // TODO: Need to handle unsent emails
         console.log('Email cannot be sent!');
-    }else{
+    } else {
         console.log(serviceResponse.msg);
     }
 
@@ -145,6 +207,7 @@ const userLogout = async (req, res) => {
 }
 
 module.exports = {
+    userSignup,
     userLogin,
     userLogout,
     extendToken,

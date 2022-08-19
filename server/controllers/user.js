@@ -11,48 +11,6 @@ const { CONFLICT, NOT_FOUND, BAD_REQUEST } = require('../utils/statusCodes')
 // importing helper function
 const { encrypt, decrypt } = require('../utils/helper')
 
-// POST: create a new user
-const createUser = async (req, res) => {
-    const {
-        firstName,
-        lastName,
-        gender,
-        email,
-        password,
-        street,
-        region,
-        country,
-        postalZip,
-    } = req.body
-
-    // if user exists do not create new user
-    let user = await User.findOne({
-        email: email,
-    })
-
-    if (user) return sendError(res, 'User already exists.', CONFLICT)
-
-    // creating new user model
-    const newUser = new User({
-        firstName: firstName.toLowerCase(),
-        lastName: lastName.toLowerCase(),
-        gender: gender.toLowerCase(),
-        email: email,
-        password: password.toLowerCase(),
-        address: {
-            street: street.toLowerCase(),
-            region: region.toLowerCase(),
-            country: country.toLowerCase(),
-            postalZip: postalZip.toLowerCase(),
-        },
-    })
-
-    // save user in database
-    await newUser.save()
-
-    return sendSuccess(res, 'User successfully created.')
-}
-
 // GET: get user using email address
 // user(userId, firstName, lastName, username, gender, email, address)
 
@@ -254,7 +212,6 @@ const getAllUsers = async (req, res) => {
 }
 
 module.exports = {
-    createUser,
     getUserByEmail,
     getUserByUserId,
     getAllUsers,

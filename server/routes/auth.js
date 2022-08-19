@@ -17,6 +17,9 @@ const CONTROLLERS = require('../controllers/auth')
  * Token Extension route.
  */
 
+// POST: user signup
+router.post('/signup', catchErrors(CONTROLLERS.userSignup))
+
 // POST: user login
 router.post('/login', catchErrors(CONTROLLERS.userLogin))
 
