@@ -13,7 +13,7 @@ const client = getClient()
 const { SERVER_ERROR, FORBIDDEN, CONFLICT } = require('../utils/statusCodes')
 
 // importing services
-const { emailService } = require('../services/email/service');
+const { emailService } = require('../services/email');
 
 // POST: user signup
 const userSignup = async (req, res) => {
