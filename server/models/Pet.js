@@ -9,7 +9,6 @@ const HELPER = require('../utils/model/pet');
 const petSchema = new Schema({
     petId: {
         type: String,
-        required: true
     },
     name: {
         type: String,
@@ -19,12 +18,12 @@ const petSchema = new Schema({
         type: String,
         required: true
     },
-    type: {
+    category: {
         type: String,
         required: true
     },
     age: {
-        type: String,
+        type: Number,
         required: true
     },
     weight: {

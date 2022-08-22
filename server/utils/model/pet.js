@@ -1,9 +1,9 @@
 /**
  * function to create unique pet ID
  *
- * @params { String, String } function takes first name and last name as parameter.
+ * @params { String } function takes pet name as parameter.
  *
- * @return { String } function returns new unique user ID.
+ * @return { String } function returns new unique pet ID.
  */
 
  function uniqueIdGenerator(name) {
