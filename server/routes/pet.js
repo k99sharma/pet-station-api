@@ -14,6 +14,7 @@ const CONTROLLERS = require('../controllers/pet')
  * Create new pet.
  * Get pet using pet Id.
  * Get all pets using owner Id.
+ * Get user Id of pet.
  * Edit pet.
  * Delete pet.
  */
@@ -26,6 +27,9 @@ router.get('/get/:petId', catchErrors(CONTROLLERS.getPetById));
 
 // GET: get pet using user id
 router.get('/getAll/:userId', catchErrors(CONTROLLERS.getPetByUserId));
+
+// GET: get user Id of pet
+router.get('/getOwnerId/:petId', catchErrors(CONTROLLERS.getOwnerId));
  
 // PUT: edit pet data
 router.put('/update/:petId', catchErrors(CONTROLLERS.updatePet));

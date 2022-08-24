@@ -5,7 +5,7 @@ const Pet = require('../models/Pet')
 const { sendSuccess, sendError } = require('../utils/errorHelper')
 
 // importing status codes
-const { CONFLICT, NOT_FOUND, BAD_REQUEST, SERVER_ERROR } = require('../utils/statusCodes')
+const { NOT_FOUND, SERVER_ERROR } = require('../utils/statusCodes')
 
 // POST: create new pet.
 const createPet = async (req, res) => {
@@ -90,6 +90,22 @@ const getPetByUserId = async (req, res) => {
     return sendSuccess(res, data);
 }
 
+// GET: get owner Id using pet Id
+const getOwnerId = async(req, res) =>{
+    // getting pet Id
+    const petId = req.params.petId;
+
+    // checking if pet Id is valid
+    const pet = await Pet.findOne({ petId: petId });
+    if(!pet)
+        return sendError(res, 'Invalid pet Id.', NOT_FOUND);
+        
+
+    const ownerId = pet.ownerId;
+
+    return sendSuccess(res, ownerId);
+}
+
 // PUT: edit pet using pet id
 const updatePet = async(req, res) => {
     // getting pet id
@@ -128,6 +144,7 @@ const deletePet = async(req, res) => {
 module.exports = {
     createPet,
     getPetById,
+    getOwnerId,
     getPetByUserId,
     updatePet,
     deletePet
