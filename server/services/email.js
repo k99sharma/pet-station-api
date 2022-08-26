@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
 const {
     EMAIL_ADDRESS,
     EMAIL_PASSWORD
-} = require('../../configs/index');
+} = require('../configs/index');
 
 /**
  * Functions to send email.
