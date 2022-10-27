@@ -52,14 +52,14 @@ app.use(
 
 // setting up production console errors
 if (NODE_ENV === 'production')
-    console.log = console.warn = console.error = () => {}
+    console.log = console.warn = console.error = () => { }
 
 // setting up routes
 app.use('/petstation/user', require('../server/routes/user')) // user route
 app.use('/petstation/username', require('../server/routes/username')) // username route
 app.use('/petstation/pet', require('../server/routes/pet'))        // pet routes
 app.use('/petstation', require('../server/routes/auth'))        // authentication route
-app.use('/petstation/test', require('../server/routes/routeTest')) // test route
+app.use('/petstation/test', require('../server/routes/test')) // test route
 
 app.use('*', notFound) // route not found
 
