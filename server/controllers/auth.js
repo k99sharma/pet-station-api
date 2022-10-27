@@ -56,22 +56,21 @@ const userSignup = async (req, res) => {
 
     // send email to client
     // TODO: this email is supposed to be confirmation email
-    const data = {
-        name: {
-            firstName: newUser.firstName,
-            lastName: newUser.lastName
-        },
-        email: newUser.email
-    }
+    // const data = {
+    //     name: {
+    //         firstName: newUser.firstName,
+    //         lastName: newUser.lastName
+    //     },
+    //     email: newUser.email
+    // }
 
-    const serviceResponse = await emailService('signup', data);
+    // const serviceResponse = await emailService('signup', data);
 
-    if (serviceResponse.error) {
-        // TODO: Need to handle unsent emails
-        console.log('Email cannot be sent!');
-    } else {
-        console.log(serviceResponse.msg);
-    }
+    // if (serviceResponse.error) {
+    //     console.log('Email cannot be sent!');
+    // } else {
+    //     console.log(serviceResponse.msg);
+    // }
 
 
     return sendSuccess(res, 'User successfully created.')
@@ -154,22 +153,22 @@ const userLogin = async (req, res) => {
     client.expire(generatedToken, 60 * 60 * 24 * 7) // setting token expiration
 
     // send email to client
-    const data = {
-        name: {
-            firstName: user.firstName,
-            lastName: user.lastName
-        },
-        email: user.email
-    }
+    // const data = {
+    //     name: {
+    //         firstName: user.firstName,
+    //         lastName: user.lastName
+    //     },
+    //     email: user.email
+    // }
 
-    const serviceResponse = await emailService('login', data);
+    // const serviceResponse = await emailService('login', data);
 
-    if (serviceResponse.error) {
-        // TODO: Need to handle unsent emails
-        console.log('Email cannot be sent!');
-    } else {
-        console.log(serviceResponse.msg);
-    }
+    // if (serviceResponse.error) {
+    //     // TODO: Need to handle unsent emails
+    //     console.log('Email cannot be sent!');
+    // } else {
+    //     console.log(serviceResponse.msg);
+    // }
 
     return sendSuccess(res, 'Login Successful.', generatedToken)
 }
@@ -188,7 +187,10 @@ const extendToken = async (req, res) => {
     await client.set(generatedToken, 'true')
     client.expire(generatedToken, 60 * 60 * 24 * 7) // setting token expiration
 
-    return sendSuccess(res, 'Token extended.', generatedToken)
+    return sendSuccess(res, {
+        msg: 'Token extended',
+        token: generatedToken
+    })
 }
 
 // POST: user logout
