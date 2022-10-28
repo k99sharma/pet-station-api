@@ -8,8 +8,8 @@ const { catchErrors } = require('../configs/errorHandlers')
 // importing controllers
 const CONTROLLERS = require('../controllers/user')
 
-// importing middlewares
-const { allAuth, adminAuth } = require('../middlewares/auth')
+// importing middleware
+const { allAuth, adminAuth } = require('../middleware/auth')
 
 /**
  * Provided routes for user

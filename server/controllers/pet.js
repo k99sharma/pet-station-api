@@ -32,25 +32,25 @@ const createPet = async (req, res) => {
 
     // saving new pet
     newPet.save()
-    .then(()=>{
-        console.info(newPet);
-        return sendSuccess(res, 'Pet created.');
-    })
-    .catch((err)=>{
-        console.error(err);
-        return sendError(res, 'Pet cannot be created.', SERVER_ERROR);
-    })
+        .then(() => {
+            console.info(newPet);
+            return sendSuccess(res, 'Pet created.');
+        })
+        .catch((err) => {
+            console.error(err);
+            return sendError(res, 'Pet cannot be created.', SERVER_ERROR);
+        })
 }
 
 // GET: get pet using pet id
-const getPetById = async(req, res) => {
+const getPetById = async (req, res) => {
     // getting pet Id
     const petId = req.params.petId;
 
     const pet = await Pet.findOne({ petId: petId });
 
     // if pet not found
-    if(pet === undefined)
+    if (pet === undefined)
         return sendError(res, 'Invalid pet Id.', NOT_FOUND);
 
     // creating response
@@ -68,18 +68,18 @@ const getPetById = async(req, res) => {
 }
 
 // GET: get pet using user id
-const getPetByUserId = async (req, res) => {
+const getPetByOwnerId = async (req, res) => {
     // getting owner id
-    const userId = req.params.userId;
+    const ownerId = req.params.ownerId;
 
     // console.log(userId);
 
-    const petsCollection = await Pet.find({ ownerId: userId });
+    const petsCollection = await Pet.find({ ownerId: ownerId });
 
     console.log(petsCollection);
 
     // if no pets are found
-    if(petsCollection.length === 0)
+    if (petsCollection.length === 0)
         return sendSuccess(res, {});
 
     // creating response
@@ -91,15 +91,15 @@ const getPetByUserId = async (req, res) => {
 }
 
 // GET: get owner Id using pet Id
-const getOwnerId = async(req, res) =>{
+const getOwnerId = async (req, res) => {
     // getting pet Id
     const petId = req.params.petId;
 
     // checking if pet Id is valid
     const pet = await Pet.findOne({ petId: petId });
-    if(!pet)
+    if (!pet)
         return sendError(res, 'Invalid pet Id.', NOT_FOUND);
-        
+
 
     const ownerId = pet.ownerId;
 
@@ -107,7 +107,7 @@ const getOwnerId = async(req, res) =>{
 }
 
 // PUT: edit pet using pet id
-const updatePet = async(req, res) => {
+const updatePet = async (req, res) => {
     // getting pet id
     const petId = req.params.petId;
 
@@ -116,7 +116,7 @@ const updatePet = async(req, res) => {
 
     // checking if pet exists
     let pet = await Pet.findOne({ petId: petId })
-    if(!pet)
+    if (!pet)
         return sendError(res, 'Invalid pet Id.', NOT_FOUND);
 
     // update pet data
@@ -126,13 +126,13 @@ const updatePet = async(req, res) => {
 }
 
 // DELETE: delete pet using pet id
-const deletePet = async(req, res) => {
+const deletePet = async (req, res) => {
     // getting pet id
     const petId = req.params.petId;
 
     // check if pet is valid
     let pet = await Pet.findOne({ petId: petId });
-    if(!pet)
+    if (!pet)
         return sendError(res, 'Invalid pet Id.', NOT_FOUND);
 
     // deleting pet using its id
@@ -145,7 +145,7 @@ module.exports = {
     createPet,
     getPetById,
     getOwnerId,
-    getPetByUserId,
+    getPetByOwnerId,
     updatePet,
     deletePet
 }

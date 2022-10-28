@@ -8,6 +8,9 @@ const { catchErrors } = require('../configs/errorHandlers')
 // importing controllers
 const CONTROLLERS = require('../controllers/auth')
 
+// importing middlewares
+const { allAuth } = require('../middleware/auth');
+
 /**
  * Provided routes for authentication
  *
@@ -27,6 +30,6 @@ router.post('/login', catchErrors(CONTROLLERS.userLogin))
 router.post('/logout/:token', catchErrors(CONTROLLERS.userLogout))
 
 // GET: token extend
-router.get('/token/extend', catchErrors(CONTROLLERS.extendToken))
+router.get('/token/extend', allAuth, catchErrors(CONTROLLERS.extendToken))
 
 module.exports = router
