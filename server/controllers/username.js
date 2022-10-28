@@ -14,9 +14,10 @@ const { encrypt, decrypt } = require('../utils/helper')
 const checkUsername = async (req, res) => {
     const username = req.query.username
 
-    const isAvailable = await Username.findOne({ username: username }).lean()
-
-    if (isAvailable) return sendError(res, 'Username not available.', CONFLICT)
+    const exists = await Username.findOne({ username: username }).lean()
+    console.log(exists);
+    if (exists)
+        return sendError(res, 'Username not available.', CONFLICT)
 
     return sendSuccess(res, 'Username available.')
 }

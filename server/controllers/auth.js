@@ -170,7 +170,10 @@ const userLogin = async (req, res) => {
     //     console.log(serviceResponse.msg);
     // }
 
-    return sendSuccess(res, 'Login Successful.', generatedToken)
+    return sendSuccess(res, {
+        msg: 'Login Successful.',
+        token: generatedToken
+    })
 }
 
 // GET: token extend i.e send new token

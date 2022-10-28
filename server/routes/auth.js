@@ -9,7 +9,7 @@ const { catchErrors } = require('../configs/errorHandlers')
 const CONTROLLERS = require('../controllers/auth')
 
 // importing middlewares
-const { allAuth } = require('../middlewares/auth');
+const { allAuth } = require('../middleware/auth');
 
 /**
  * Provided routes for authentication
