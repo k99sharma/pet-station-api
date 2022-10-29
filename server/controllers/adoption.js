@@ -66,7 +66,40 @@ const putPetForAdoption = async (req, res) => {
 }
 
 
+// GET: get all pets up for adoption by owner
+const getAllUserPetsForAdoption = async (req, res) => {
+    const ownerId = req.params.ownerId;
+
+    // check if there is available session for user
+    const availableSession = await AdoptionSession.findOne({ userId: ownerId })
+
+    if (!availableSession)
+        return sendSuccess(res, 'No pets put for adoption');
+
+    const petsList = await AdoptionList.find({
+        sessionId: String(availableSession._id)
+    }).populate('petId')
+
+
+    // response data
+    const data = []
+    for (let pet of petsList) {
+        data.push({
+            name: pet.petId.name,
+            breed: pet.petId.breed,
+            category: pet.petId.category,
+            age: pet.petId.age,
+            weight: pet.petId.weight,
+            gender: pet.petId.gender,
+            petId: pet.petId.petId,
+            ownerId: pet.petId.ownerId,
+        })
+    }
+
+    return sendSuccess(res, data);
+}
 
 module.exports = {
-    putPetForAdoption
+    putPetForAdoption,
+    getAllUserPetsForAdoption
 }

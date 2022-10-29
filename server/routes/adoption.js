@@ -25,10 +25,10 @@ const { allAuth } = require('../middleware/auth');
  */
 
 
-// POST: put pet on adoption
+// POST: put pet for adoption
 router.post('/putPetForAdoption/:petId', allAuth, catchErrors(CONTROLLERS.putPetForAdoption));
 
-// // GET: see all available pet for adoption
-// router.get('/get/allPetsForAdoption/:userId', allAuth, CONTROLLERS.);
+// GET: see all user available pet for adoption
+router.get('/get/allUserPetsForAdoption/:ownerId', allAuth, catchErrors(CONTROLLERS.getAllUserPetsForAdoption));
 
 module.exports = router;
