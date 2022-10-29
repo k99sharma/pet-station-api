@@ -48,9 +48,9 @@ const getPetById = async (req, res) => {
     const petId = req.params.petId;
 
     const pet = await Pet.findOne({ petId: petId });
-
+    console.log(pet);
     // if pet not found
-    if (pet === undefined)
+    if (!pet)
         return sendError(res, 'Invalid pet Id.', NOT_FOUND);
 
     // creating response

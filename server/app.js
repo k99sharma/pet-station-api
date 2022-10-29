@@ -59,6 +59,7 @@ app.use('/petstation/user', require('../server/routes/user')) // user route
 app.use('/petstation/username', require('../server/routes/username')) // username route
 app.use('/petstation/pet', require('../server/routes/pet'))        // pet routes
 app.use('/petstation', require('../server/routes/auth'))        // authentication route
+app.use('/petstation/adoption', require('../server/routes/adoption'))       // adoption route
 app.use('/petstation/test', require('../server/routes/test')) // test route
 
 app.use('*', notFound) // route not found
