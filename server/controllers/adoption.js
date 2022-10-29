@@ -2,6 +2,7 @@
 const AdoptionSession = require('../models/AdoptionSession');
 const AdoptionList = require('../models/AdoptionList');
 const Pet = require('../models/Pet');
+const AdoptionRequest = require('../models/AdoptionRequest');
 
 // importing error handlers
 const { sendSuccess, sendError } = require('../utils/errorHelper')
@@ -137,8 +138,76 @@ const removePet = async (req, res) => {
     return sendSuccess(res, 'Pet is removed from adoption list.');
 }
 
+// POST: send adoption request
+const sendAdoptionRequest = async (req, res) => {
+    const userId = req.params.userId;
+    const { ownerId, petId } = req.body;
+
+    // request data
+    const newRequest = {
+        userId: userId,
+        petId: petId
+    }
+
+    // create adoption request 
+    let adoptionRequest = await AdoptionRequest.findOne({ userId: ownerId });
+    if (!adoptionRequest) {
+        adoptionRequest = new AdoptionRequest({
+            userId: ownerId
+        })
+
+        // save instance
+        await adoptionRequest.save()
+            .then(() => {
+                console.log('New adoption request');
+            })
+            .catch(err => {
+                console.log('Failed to make request');
+                console.error(err);
+                return sendError(res, 'Unable to send request', SERVER_ERROR);
+            })
+    }
+
+    // push request data 
+    const adoptionRequestId = adoptionRequest._id;
+    await AdoptionRequest.findByIdAndUpdate(adoptionRequestId, {
+        $push: {
+            requests: newRequest
+        }
+    })
+
+
+    return sendSuccess(res, 'Request is sent!');
+}
+
+// GET: get all pets available for adoption
+const getAllPets = async (req, res) => {
+    const adoptionList = await AdoptionList.find({}).populate('petId');
+
+    const data = []
+    for (let pet of adoptionList) {
+        data.push({
+            data: {
+                name: pet.petId.name,
+                breed: pet.petId.breed,
+                category: pet.petId.category,
+                age: pet.petId.age,
+                weight: pet.petId.weight,
+                ownerId: pet.petId.ownerId,
+                gender: pet.petId.gender,
+                petId: pet.petId.petId,
+            },
+            adoptionStatus: pet.isAdopted
+        })
+    }
+
+    return sendSuccess(res, data);
+}
+
 module.exports = {
     putPetForAdoption,
     getAllUserPetsForAdoption,
-    removePet
+    removePet,
+    sendAdoptionRequest,
+    getAllPets
 }

@@ -12,6 +12,10 @@ const adoptionListSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Pet',
         required: true
+    },
+    isAdopted: {
+        type: Boolean,
+        default: false
     }
 },
     {

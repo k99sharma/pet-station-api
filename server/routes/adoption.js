@@ -14,14 +14,15 @@ const { allAuth } = require('../middleware/auth');
 /**
  * Provided routes for authentication
  * 
- * Put pet on adoption
+ * Put pet on adoption -> done
  * Get all available pet for adoption
  * Adopt a pet
- * Remove pet from adoption
+ * Remove pet from adoption -> done
  * Check adoption history
- * Get all pet put on adoption using owner Id
+ * Get all pet put on adoption using owner Id -> done
  * Get all adopted pets using owner Id
- * Send adoption request
+ * Send adoption request -> done
+ * Accept adoption request
  */
 
 
@@ -33,5 +34,11 @@ router.get('/get/allUserPetsForAdoption/:ownerId', allAuth, catchErrors(CONTROLL
 
 // DELETE: remove pet from adoption list
 router.delete('/delete/:petId', allAuth, catchErrors(CONTROLLERS.removePet));
+
+// POST: make an adoption request
+router.post('/adoptionRequest/send/:userId', allAuth, catchErrors(CONTROLLERS.sendAdoptionRequest));
+
+// GET: get all pets available for adoption
+router.get('/getAllPets', allAuth, catchErrors(CONTROLLERS.getAllPets));
 
 module.exports = router;
