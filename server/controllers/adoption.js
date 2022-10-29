@@ -1,6 +1,7 @@
 // importing modals
 const AdoptionSession = require('../models/AdoptionSession');
 const AdoptionList = require('../models/AdoptionList');
+const Pet = require('../models/Pet');
 
 // importing error handlers
 const { sendSuccess, sendError } = require('../utils/errorHelper')
@@ -74,7 +75,7 @@ const getAllUserPetsForAdoption = async (req, res) => {
     const availableSession = await AdoptionSession.findOne({ userId: ownerId })
 
     if (!availableSession)
-        return sendSuccess(res, 'No pets put for adoption');
+        return sendSuccess(res, 'No pets available for adoption');
 
     const petsList = await AdoptionList.find({
         sessionId: String(availableSession._id)
@@ -96,10 +97,48 @@ const getAllUserPetsForAdoption = async (req, res) => {
         })
     }
 
+    if (data.length === 0)
+        return sendSuccess(res, 'No pet available for adoption')
+
     return sendSuccess(res, data);
+}
+
+// DELETE: remove pet from adoption
+const removePet = async (req, res) => {
+    let petId = req.params.petId;
+    const ownerId = req.user.userId;
+
+    // get session id of user -> we are assuming it is always present
+    const session = await AdoptionSession.findOne({ userId: ownerId });
+    const sessionId = session._id;  // session id
+
+    const pet = await Pet.findOne({ petId: petId })
+    petId = pet._id;        // pet document Id
+
+    const adoptionInstance = await AdoptionList.findOne({
+        petId: petId,
+        sessionId: sessionId
+    })
+
+    if (!adoptionInstance)
+        return sendError(res, 'Invalid pet Id.', NOT_FOUND)
+
+    // deleting instance
+    await AdoptionList.findByIdAndDelete(adoptionInstance._id)
+        .then(() => {
+            console.log('Pet adoption instance is deleted!')
+        })
+        .catch(err => {
+            console.log('Pet adoption instance cannot be deleted')
+            console.error(err)
+            return sendError(res, 'Unable to remove pet.', SERVER_ERROR);
+        })
+
+    return sendSuccess(res, 'Pet is removed from adoption list.');
 }
 
 module.exports = {
     putPetForAdoption,
-    getAllUserPetsForAdoption
+    getAllUserPetsForAdoption,
+    removePet
 }
