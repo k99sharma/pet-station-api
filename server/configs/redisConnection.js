@@ -1,6 +1,12 @@
 // importing modules
 const redis = require('redis')
 
+// importing configs
+const {
+    REDIS_URL,
+    NODE_ENV
+} = require('./index');
+
 /**
  * function to create redis client.
  * @params { void }
@@ -10,7 +16,13 @@ const redis = require('redis')
 let client
 
 async function connectRedis() {
-    client = redis.createClient()
+    if (NODE_ENV === 'production') {
+        client = redis.createClient({
+            url: REDIS_URL
+        })
+    } else {
+        client = redis.createClient()
+    }
 
     client.on('error', (err) => {
         console.log(err)
