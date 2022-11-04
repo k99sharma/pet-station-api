@@ -80,7 +80,7 @@ const getPetByOwnerId = async (req, res) => {
 
     // if no pets are found
     if (petsCollection.length === 0)
-        return sendSuccess(res, {});
+        return sendSuccess(res, []);
 
     // creating response
     // TODO: need to change the structure of json format
