@@ -76,7 +76,7 @@ const getAllUserPetsForAdoption = async (req, res) => {
     const availableSession = await AdoptionSession.findOne({ userId: ownerId })
 
     if (!availableSession)
-        return sendSuccess(res, 'No pets available for adoption');
+        return sendSuccess(res, []);
 
     const petsList = await AdoptionList.find({
         sessionId: String(availableSession._id)
