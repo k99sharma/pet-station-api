@@ -6,7 +6,7 @@ const LoginDetail = require('../models/LoginDetail')
 const { sendSuccess, sendError } = require('../utils/errorHelper')
 
 // importing status codes
-const { CONFLICT, NOT_FOUND, BAD_REQUEST } = require('../utils/statusCodes')
+const { NOT_FOUND, BAD_REQUEST } = require('../utils/statusCodes')
 
 // importing helper function
 const { encrypt, decrypt } = require('../utils/helper')

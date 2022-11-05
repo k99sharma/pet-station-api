@@ -59,7 +59,7 @@ const userLogin = async (req, res) => {
     const { email, password } = req.body
 
     // check if email is valid
-    const user = await User.findOne({ email: email })
+    const user = await User.findOne({ email: email }).lean();
     if (!user) return sendError(res, 'Invalid email or password', FORBIDDEN)
 
     // check if password is valid
@@ -89,7 +89,7 @@ const extendToken = async (req, res) => {
     const userId = req.user.userId
 
     // get user
-    const user = await User.findOne({ userId: userId })
+    const user = await User.findOne({ userId: userId }).lean();
 
     // generate new token
     const generatedToken = await user.generateAuthToken()
