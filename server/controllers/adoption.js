@@ -16,8 +16,8 @@ const putPetForAdoption = async (req, res) => {
     const petId = req.params.petId;
     const userId = req.user.userId;
 
-    // get the pet
-    let pet = await Pet.findByIdAndUpdate(petId, {
+    // get pet and update adoption status
+    let pet = await Pet.findOneAndUpdate({ petId: petId }, {
         adoptionStatus: 'pending'
     })
 
