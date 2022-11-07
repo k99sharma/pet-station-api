@@ -30,6 +30,11 @@ const petSchema = new Schema({
         type: Number,
         required: true
     },
+    adoptionStatus: {
+        type: String,
+        default: 'none',
+        enum: ['none', 'pending', 'completed']
+    },
     ownerId: {
         type: String,
         required: true
@@ -40,18 +45,18 @@ const petSchema = new Schema({
         required: true
     }
 },
-{
-    timestamps: true
-})
+    {
+        timestamps: true
+    })
 
 
 // function to set pet Id
-petSchema.pre('save', function(next){
+petSchema.pre('save', function (next) {
     const name = this.name.toLowerCase();
     const uniqueId = HELPER.uniqueIdGenerator(name);
 
     this.petId = uniqueId;
-    
+
     next();
 })
 
