@@ -16,6 +16,13 @@ const putPetForAdoption = async (req, res) => {
     const petId = req.params.petId;
     const userId = req.user.userId;
 
+    // get the pet
+    let pet = await Pet.findByIdAndUpdate(petId, {
+        adoptionStatus: 'pending'
+    })
+
+    const petDocumentId = pet._id;
+
     // check if an adoption session is present for user
     let adoptionSession = await AdoptionSession.findOne({ userId: userId });
 
@@ -42,7 +49,7 @@ const putPetForAdoption = async (req, res) => {
     // check if pet is already present for adoption
     const isAvailable = await AdoptionList.findOne({
         sessionId: sessionId,
-        petId: petId
+        petId: petDocumentId
     })
 
     if (isAvailable)
@@ -51,7 +58,7 @@ const putPetForAdoption = async (req, res) => {
     // now we are gonna put for adoption
     const putForAdoption = new AdoptionList({
         sessionId: sessionId,
-        petId: petId
+        petId: petDocumentId
     })
 
     // save pet put for adoption
