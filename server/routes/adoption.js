@@ -41,4 +41,7 @@ router.post('/adoptionRequest/send/:userId', allAuth, catchErrors(CONTROLLERS.se
 // GET: get all pets available for adoption
 router.get('/getAllPets', allAuth, catchErrors(CONTROLLERS.getAllPets));
 
+// POST: complete adoption
+router.post('/complete/:petId', allAuth, catchErrors(CONTROLLERS.completeAdoption));
+
 module.exports = router;

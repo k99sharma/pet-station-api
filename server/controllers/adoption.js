@@ -3,6 +3,7 @@ const AdoptionSession = require('../models/AdoptionSession');
 const AdoptionList = require('../models/AdoptionList');
 const Pet = require('../models/Pet');
 const AdoptionRequest = require('../models/AdoptionRequest');
+const AdoptionRecord = require('../models/AdoptionRecord');
 
 // importing error handlers
 const { sendSuccess, sendError } = require('../utils/errorHelper')
@@ -211,10 +212,58 @@ const getAllPets = async (req, res) => {
     return sendSuccess(res, data);
 }
 
+// POST: complete adoption for pet
+const completeAdoption = async (req, res) => {
+    const { userId } = req.user;
+    const { petId } = req.params;
+
+    const pet = await Pet.findOne({ petId: petId });
+
+    // create new record of adoption for user
+    const adoptionRecord = new AdoptionRecord({
+        userId: userId,
+        pet: pet
+    })
+
+    // adoption record is saved
+    await adoptionRecord.save()
+        .then(() => {
+            console.log('Adoption Record is created.')
+        })
+        .catch(err => {
+            console.error(err);
+            console.log('Adoption record cannot be created.')
+            return sendError(res, 'Adoption cannot be completed.', SERVER_ERROR)
+        })
+
+    // delete pet from adoption list
+    await AdoptionList.findOneAndDelete({ userId: userId })
+        .then(() => {
+            console.log('Pet is deleted from adoption list.')
+        })
+        .catch(err => {
+            console.error(err)
+            console.log('Pet cannot be deleted from adoption list.')
+        })
+
+    // delete pet from pet 
+    await Pet.findOneAndDelete({ userId: userId })
+        .then(() => {
+            console.log('Pet is deleted');
+        })
+        .catch(err => {
+            console.error(err);
+            console.log('pet cannot be deleted.');
+        })
+
+    return sendSuccess(res, 'Adoption is successful!');
+}
+
 module.exports = {
     putPetForAdoption,
     getAllUserPetsForAdoption,
     removePet,
     sendAdoptionRequest,
-    getAllPets
+    getAllPets,
+    completeAdoption
 }
