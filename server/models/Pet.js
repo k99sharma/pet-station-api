@@ -14,6 +14,10 @@ const petSchema = new Schema({
         type: String,
         required: true
     },
+    imageUrl: {
+        type: String,
+        required: true
+    },
     breed: {
         type: String,
         required: true
