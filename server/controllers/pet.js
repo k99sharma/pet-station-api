@@ -12,6 +12,7 @@ const createPet = async (req, res) => {
     const {
         name,
         breed,
+        imageUrl,
         category,
         age,
         weight,
@@ -23,6 +24,7 @@ const createPet = async (req, res) => {
     const newPet = new Pet({
         name: name,
         breed: breed.toLowerCase(),
+        imageUrl: imageUrl,
         category: category.toLowerCase(),
         age: age,
         weight: weight,

@@ -28,6 +28,9 @@ const userSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: 'Username',
         },
+        imageUrl: {
+            type: String,
+        },
         gender: {
             type: String,
             required: true,
