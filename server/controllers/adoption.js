@@ -107,7 +107,7 @@ const getAllUserPetsForAdoption = async (req, res) => {
     }
 
     if (data.length === 0)
-        return sendSuccess(res, 'No pet available for adoption')
+        return sendSuccess(res, [])
 
     return sendSuccess(res, data);
 }
