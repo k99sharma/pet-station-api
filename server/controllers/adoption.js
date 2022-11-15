@@ -199,6 +199,8 @@ const getAllPets = async (req, res) => {
                 name: pet.petId.name,
                 breed: pet.petId.breed,
                 category: pet.petId.category,
+                imageUrl: pet.petId.imageUrl,
+                description: pet.petId.description,
                 age: pet.petId.age,
                 weight: pet.petId.weight,
                 ownerId: pet.petId.ownerId,
