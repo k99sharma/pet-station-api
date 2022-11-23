@@ -1,13 +1,17 @@
 {
   "name": "pet-station-api",
   "version": "1.0.0",
-  "description": "Pet station API\u001b[D\u001b[D\u001b[D\u001b[D REST API",
+  "description": "Pet station REST API",
   "main": "index.js",
   "scripts": {
     "dev": "node index.js",
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint . --fix --max-warnings=0",
+    "format": "prettier . --write",
+    "prepare": "husky install"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/k99sharma/pet-station-api.git"
@@ -17,5 +21,18 @@
   "bugs": {
     "url": "https://github.com/k99sharma/pet-station-api/issues"
   },
-  "homepage": "https://github.com/k99sharma/pet-station-api#readme"
+  "homepage": "https://github.com/k99sharma/pet-station-api#readme",
+  "devDependencies": {
+    "eslint": "^8.28.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "husky": "^8.0.2",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.8.0"
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix",
+    "*.--write": "prettier --write"
+  }
 }
