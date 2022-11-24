@@ -6,6 +6,7 @@ dotenv.config();
 
 const CONFIG = {
     NODE_ENV: process.env.NODE_ENV,
+    VERSION: process.env.VERSION,
     PORT: process.env.PORT,
     MONGO_URI:
         process.env.NODE_ENV === 'production'
