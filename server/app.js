@@ -4,18 +4,17 @@ import compression from 'compression';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
-import dotenv from 'dotenv';
 
 // importing configs
 import CONFIG from './configs/config.js';
 
-// configuring environment variables
-dotenv.config();
+// configuring database connection
+import connectDB from './configs/dbConnection.js';
+
+connectDB();
 
 // app
 const app = express();
-
-// configuring DB
 
 // configuring Redis
 
