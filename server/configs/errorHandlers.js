@@ -1,5 +1,5 @@
 // importing error helper
-import sendError from '../utilities/errorHelper.js';
+import { sendError } from '../utilities/errorHelper.js';
 
 // importing status codes
 import statusCodes from '../utilities/statusCodes.js';

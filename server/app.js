@@ -5,8 +5,14 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
 
+// importing error handlers
+import { notFound, sendErrors } from './configs/errorHandlers.js';
+
 // importing configs
 import CONFIG from './configs/config.js';
+
+// importing routes
+import testRoute from './routes/test.js';
 
 // configuring database connection
 import connectDB from './configs/dbConnection.js';
@@ -39,6 +45,12 @@ if (CONFIG.NODE_ENV === 'production') {
 }
 
 // configuring routes
+app.use(`/${CONFIG.VERSION}`, testRoute);
+
+app.use('*', notFound);     // invalid route
+
+// error handler
+app.use(sendErrors);
 
 // allowing headers
 app.use((req, res, next) => {
