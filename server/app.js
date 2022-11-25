@@ -12,6 +12,7 @@ import { notFound, sendErrors } from './configs/errorHandlers.js';
 import CONFIG from './configs/config.js';
 
 // importing routes
+import authRoute from './routes/auth.js';
 import testRoute from './routes/test.js';
 
 // configuring database connection
@@ -45,6 +46,7 @@ if (CONFIG.NODE_ENV === 'production') {
 }
 
 // configuring routes
+app.use(`/${CONFIG.VERSION}/auth`, authRoute);
 app.use(`/${CONFIG.VERSION}`, testRoute);
 
 app.use('*', notFound);     // invalid route
