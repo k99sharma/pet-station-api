@@ -12,7 +12,8 @@ const CONFIG = {
         process.env.NODE_ENV === 'production'
             ? process.env.MONGO_URI_PROD
             : process.env.MONGO_URI_DEV,
-    JWT_PRIVATE_KEY: process.env.JWT_PRIVATE_KEY
+    JWT_PRIVATE_KEY: process.env.JWT_PRIVATE_KEY,
+    REDIS_URL: process.env.REDIS_URL
 }
 
 export default CONFIG;

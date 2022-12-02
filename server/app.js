@@ -11,19 +11,22 @@ import { notFound, sendErrors } from './configs/errorHandlers.js';
 // importing configs
 import CONFIG from './configs/config.js';
 
+// importing database and redis
+import connectDB from './configs/dbConnection.js';
+import { connectRedis } from './configs/redisConnection.js';
+
 // importing routes
 import authRoute from './routes/auth.js';
 import testRoute from './routes/test.js';
 
-// configuring database connection
-import connectDB from './configs/dbConnection.js';
-
-connectDB();
-
 // app
 const app = express();
 
-// configuring Redis
+// connect database
+connectDB();
+
+// connect redis
+connectRedis();
 
 // configuring middleware
 app.use(morgan('combined'));      // morgan

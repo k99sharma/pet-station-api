@@ -94,7 +94,6 @@ userSchema.pre('save', function (next) {
 })
 
 // function to set password
-// eslint-disable-next-line consistent-return
 userSchema.pre('save', async function (next) {
     // if password is already modified go to next
     if (!this.isModified('password')) return next()
@@ -104,14 +103,16 @@ userSchema.pre('save', async function (next) {
 
     this.password = hash;
 
-    next();
+    return next();
 })
 
 // function to check if password is valid
-userSchema.methods.isValidPassword = function (password) {
-    bcryptjs.compare(password, this.password)
-        .then(res => res)
-        .catch(err => new Error(err))
+userSchema.methods.isValidPassword = async function (password) {
+    try {
+        return await bcryptjs.compare(password, this.password)
+    } catch (error) {
+        throw new Error(error)
+    }
 }
 
 // function to generate authentication token

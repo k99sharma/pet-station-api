@@ -17,9 +17,9 @@ function connectDB() {
         });
 
         const db = mongoose.connection;
-        db.on('error', console.error.bind(console, 'Connection Error: '));
+        db.on('error', console.error.bind(console, 'Database connection Error: '));
         db.once('open', () => {
-            console.log('Connection is successful!');
+            console.log('Database connection is successful!');
         });
     }
     catch (err) {
