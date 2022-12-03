@@ -7,7 +7,8 @@ import { catchErrors } from '../configs/errorHandlers.js';
 // importing controllers
 import {
     signup,
-    login
+    login,
+    resetPassword
 } from '../controllers/auth.js';
 
 const router = express.Router();
@@ -26,5 +27,8 @@ router.post('/signup', catchErrors(signup));
 
 // POST: login
 router.post('/login', catchErrors(login));
+
+// POST: reset password
+router.post('/password/reset', catchErrors(resetPassword));
 
 export default router;

@@ -1,5 +1,8 @@
 // controllers for auth routes
 
+// importing libraries
+import bcryptjs from 'bcryptjs';
+
 // importing schemas
 import User from '../schemas/User.js';
 
@@ -112,3 +115,41 @@ export async function login(req, res) {
         'success'
     );
 }
+
+
+// reset password controller
+export async function resetPassword(req, res) {
+    const { userId, password } = req.body;
+
+    // generating password hash
+    const salt = await bcryptjs.genSalt(10);
+    const hash = await bcryptjs.hash(password, salt);
+
+    // updating user password
+    User.findOneAndUpdate({ UID: userId }, {
+        password: hash
+    })
+        .then(() => {
+            console.log('Password is updated.')
+        })
+        .catch(err => {
+            console.error(err);
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'Password cannot be reset.',
+                'error'
+            );
+        })
+
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        'Password successfully reset.',
+        'success'
+    );
+}
+
+// extend token controller
+
