@@ -8,7 +8,9 @@ import { catchErrors } from '../configs/errorHandlers.js';
 import {
     signup,
     login,
-    resetPassword
+    resetPassword,
+    extendToken,
+    logout
 } from '../controllers/auth.js';
 
 const router = express.Router();
@@ -19,6 +21,7 @@ const router = express.Router();
  * POST: sign up
  * POST: login
  * POST: reset password
+ * GET: extend token
  * POST: logout
  */
 
@@ -30,5 +33,11 @@ router.post('/login', catchErrors(login));
 
 // POST: reset password
 router.post('/password/reset', catchErrors(resetPassword));
+
+// GET: extend token
+router.get('/token/extend', catchErrors(extendToken));
+
+// POST: logout
+router.post('/logout/:token', catchErrors(logout));
 
 export default router;

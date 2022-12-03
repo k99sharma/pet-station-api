@@ -152,4 +152,58 @@ export async function resetPassword(req, res) {
 }
 
 // extend token controller
+export async function extendToken(req, res) {
+    const { userId } = req.user;
 
+    // user document
+    const user = await User.findOne({ UID: userId });
+
+    // generate new token
+    const generatedToken = await user.generateAuthToken()
+
+    // adding value in redis cache
+    const redisClient = getRedisClient();
+    await redisClient.set(generatedToken, 'true')
+    redisClient.expire(generatedToken, 60 * 60 * 24 * 7) // setting token expiration
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        {
+            msg: 'Token is extended.',
+            token: generatedToken
+        },
+        'success'
+    )
+}
+
+// logout controller
+export async function logout(req, res) {
+    const { token } = req.params;
+
+    // delete token from redis
+    const redisClient = getRedisClient();
+    // eslint-disable-next-line consistent-return
+    redisClient.del(token)
+        .then(() => {
+            console.log('Token is deleted.');
+        })
+        .catch(err => {
+            console.log('Token cannot be deleted.');
+            console.error(err);
+
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'Logout failed.',
+                'error'
+            );
+        })
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        'Logout successful.',
+        'success'
+    );
+}
