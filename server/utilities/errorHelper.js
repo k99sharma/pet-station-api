@@ -10,11 +10,11 @@
 */
 
 // function to send error
-export function sendError(res, statusCode, message, status, code) {
+export function sendError(res, statusCode, message, status) {
     res.status(statusCode).json({
         status,
         message,
-        code,
+        code: statusCode,
         data: null
     });
 }

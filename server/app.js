@@ -11,18 +11,22 @@ import { notFound, sendErrors } from './configs/errorHandlers.js';
 // importing configs
 import CONFIG from './configs/config.js';
 
-// importing routes
-import testRoute from './routes/test.js';
-
-// configuring database connection
+// importing database and redis
 import connectDB from './configs/dbConnection.js';
+import { connectRedis } from './configs/redisConnection.js';
 
-connectDB();
+// importing routes
+import authRoute from './routes/auth.js';
+import testRoute from './routes/test.js';
 
 // app
 const app = express();
 
-// configuring Redis
+// connect database
+connectDB();
+
+// connect redis
+connectRedis();
 
 // configuring middleware
 app.use(morgan('combined'));      // morgan
@@ -45,6 +49,7 @@ if (CONFIG.NODE_ENV === 'production') {
 }
 
 // configuring routes
+app.use(`/${CONFIG.VERSION}/auth`, authRoute);
 app.use(`/${CONFIG.VERSION}`, testRoute);
 
 app.use('*', notFound);     // invalid route
