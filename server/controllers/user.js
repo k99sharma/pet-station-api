@@ -62,5 +62,31 @@ export async function getUserByUID(req, res) {
 
 // PUT: change username
 export async function changeUsername(req, res) {
-    res.send('aoiej')
+    const { userId } = req.user;
+    const { newUsername } = req.body;
+
+    Username.findOneAndUpdate({ UID: userId }, {
+        username: newUsername
+    })
+        .then(() => {
+            console.log('Username is updated.');
+        })
+        .catch(err => {
+            console.log('Username cannot be updated.');
+            console.error(err);
+
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'Username cannot be updated.',
+                'error'
+            );
+        })
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        'Username updated.',
+        'success'
+    );
 }

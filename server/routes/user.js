@@ -9,7 +9,8 @@ import { allAuth } from '../middleware/auth.js';
 
 // importing controllers
 import {
-    getUserByUID
+    getUserByUID,
+    changeUsername
 } from '../controllers/user.js';
 
 const router = express.Router();
@@ -25,6 +26,10 @@ const router = express.Router();
  * GET: check if username is valid or not
  */
 
+// GET: get user details using UID
 router.get('/get', allAuth, catchErrors(getUserByUID));
+
+// PUT: username change
+router.put('/update-username', allAuth, catchErrors(changeUsername));
 
 export default router;
