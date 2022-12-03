@@ -5,6 +5,7 @@ import bcryptjs from 'bcryptjs';
 
 // importing schemas
 import User from '../schemas/User.js';
+import Username from '../schemas/Username.js';
 
 // importing status codes
 import statusCodes from '../utilities/statusCodes.js';
@@ -14,6 +15,9 @@ import { sendSuccess, sendError } from '../utilities/errorHelper.js';
 
 // import redis client
 import { getRedisClient } from '../configs/redisConnection.js';
+
+// importing helpers
+import { generateDefaultUsername } from '../utilities/helper.js';
 
 // signup controller
 export async function signup(req, res) {
@@ -49,6 +53,22 @@ export async function signup(req, res) {
         .then(data => {
             console.log(data);
             console.log('User is saved.');
+
+            // setting up default username for the user
+            const newDefaultUsername = generateDefaultUsername(data.firstName);   // generating new username
+            const username = new Username({
+                UID: data.UID,
+                username: newDefaultUsername
+            });
+
+            username.save()
+                .then(() => {
+                    console.log('Default username is set.');
+                })
+                .catch((err) => {
+                    console.error(err);
+                    console.log('Username cannot be set.');
+                })
         })
         .catch(err => {
             console.log('User cannot be saved.')

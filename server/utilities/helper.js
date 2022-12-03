@@ -11,6 +11,9 @@ export function generateUID(key) {
     return key + randomNumber;
 }
 
-export function fetchData() {
+// function to generate default username
+export function generateDefaultUsername(firstName) {
+    const randomNumber = Math.floor(100000 + Math.random() * 900000);
 
+    return firstName + randomNumber;
 }
