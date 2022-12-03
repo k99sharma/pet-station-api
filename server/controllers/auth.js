@@ -106,34 +106,48 @@ export async function login(req, res) {
         );
 
     // check if password is valid
-    const isPasswordValid = await user.isValidPassword(password);
+    user.isValidPassword(password)
+        .then(() => {
+            console.log('Password is valid.');
 
-    if (!isPasswordValid)
-        return sendError(
-            res,
-            statusCodes.FORBIDDEN,
-            'Email or password is invalid.',
-            'fail'
-        );
+            // generate auth token
+            // send this token in response
+            const generatedToken = user.generateAuthToken();
 
-    // generate auth token
-    // send this token in response
-    const generatedToken = user.generateAuthToken();
+            // add value in redis cache
+            const redisClient = getRedisClient();
+            redisClient.set(generatedToken, 'true')
+                .then(() => {
+                    console.log('Redis token is set');
+                    redisClient.expire(generatedToken, 60 * 60 * 24 * 7);     // token expiration
+                })
+                .catch(err => {
+                    console.error(err);
+                })
 
-    // add value in redis cache
-    const redisClient = getRedisClient();
-    await redisClient.set(generatedToken, 'true');
-    redisClient.expire(generatedToken, 60 * 60 * 24 * 7);     // token expiration
+            return sendSuccess(
+                res,
+                statusCodes.OK,
+                {
+                    msg: 'Login is successful.',
+                    token: generatedToken
+                },
+                'success'
+            );
+        })
+        .catch(err => {
+            console.log('Password is not valid.');
+            console.error(err);
 
-    return sendSuccess(
-        res,
-        statusCodes.OK,
-        {
-            msg: 'Login is successful.',
-            token: generatedToken
-        },
-        'success'
-    );
+            return sendError(
+                res,
+                statusCodes.FORBIDDEN,
+                'Email or password is invalid.',
+                'fail'
+            );
+        })
+
+    return null;
 }
 
 
