@@ -17,6 +17,7 @@ import { connectRedis } from './configs/redisConnection.js';
 
 // importing routes
 import authRoute from './routes/auth.js';
+import userRoute from './routes/user.js';
 import testRoute from './routes/test.js';
 
 // app
@@ -50,6 +51,7 @@ if (CONFIG.NODE_ENV === 'production') {
 
 // configuring routes
 app.use(`/${CONFIG.VERSION}/auth`, authRoute);
+app.use(`/${CONFIG.VERSION}/user`, userRoute);
 app.use(`/${CONFIG.VERSION}`, testRoute);
 
 app.use('*', notFound);     // invalid route

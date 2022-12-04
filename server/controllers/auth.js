@@ -5,6 +5,7 @@ import bcryptjs from 'bcryptjs';
 
 // importing schemas
 import User from '../schemas/User.js';
+import Username from '../schemas/Username.js';
 
 // importing status codes
 import statusCodes from '../utilities/statusCodes.js';
@@ -14,6 +15,9 @@ import { sendSuccess, sendError } from '../utilities/errorHelper.js';
 
 // import redis client
 import { getRedisClient } from '../configs/redisConnection.js';
+
+// importing helpers
+import { generateDefaultUsername } from '../utilities/helper.js';
 
 // signup controller
 export async function signup(req, res) {
@@ -49,6 +53,22 @@ export async function signup(req, res) {
         .then(data => {
             console.log(data);
             console.log('User is saved.');
+
+            // setting up default username for the user
+            const newDefaultUsername = generateDefaultUsername(data.firstName);   // generating new username
+            const username = new Username({
+                UID: data.UID,
+                username: newDefaultUsername
+            });
+
+            username.save()
+                .then(() => {
+                    console.log('Default username is set.');
+                })
+                .catch((err) => {
+                    console.error(err);
+                    console.log('Username cannot be set.');
+                })
         })
         .catch(err => {
             console.log('User cannot be saved.')
@@ -86,34 +106,48 @@ export async function login(req, res) {
         );
 
     // check if password is valid
-    const isPasswordValid = await user.isValidPassword(password);
+    user.isValidPassword(password)
+        .then(() => {
+            console.log('Password is valid.');
 
-    if (!isPasswordValid)
-        return sendError(
-            res,
-            statusCodes.FORBIDDEN,
-            'Email or password is invalid.',
-            'fail'
-        );
+            // generate auth token
+            // send this token in response
+            const generatedToken = user.generateAuthToken();
 
-    // generate auth token
-    // send this token in response
-    const generatedToken = user.generateAuthToken();
+            // add value in redis cache
+            const redisClient = getRedisClient();
+            redisClient.set(generatedToken, 'true')
+                .then(() => {
+                    console.log('Redis token is set');
+                    redisClient.expire(generatedToken, 60 * 60 * 24 * 7);     // token expiration
+                })
+                .catch(err => {
+                    console.error(err);
+                })
 
-    // add value in redis cache
-    const redisClient = getRedisClient();
-    await redisClient.set(generatedToken, 'true');
-    redisClient.expire(generatedToken, 60 * 60 * 24 * 7);     // token expiration
+            return sendSuccess(
+                res,
+                statusCodes.OK,
+                {
+                    msg: 'Login is successful.',
+                    token: generatedToken
+                },
+                'success'
+            );
+        })
+        .catch(err => {
+            console.log('Password is not valid.');
+            console.error(err);
 
-    return sendSuccess(
-        res,
-        statusCodes.OK,
-        {
-            msg: 'Login is successful.',
-            token: generatedToken
-        },
-        'success'
-    );
+            return sendError(
+                res,
+                statusCodes.FORBIDDEN,
+                'Email or password is invalid.',
+                'fail'
+            );
+        })
+
+    return null;
 }
 
 

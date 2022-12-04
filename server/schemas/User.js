@@ -37,10 +37,6 @@ const userSchema = new Schema({
         type: String,
         default: null
     },
-    username: {
-        type: String,
-        default: null
-    },
     address: {
         street: {
             type: String,
@@ -118,7 +114,7 @@ userSchema.methods.isValidPassword = async function (password) {
 // function to generate authentication token
 userSchema.methods.generateAuthToken = function () {
     const token = jsonwebtoken.sign({
-        userId: this.userId,
+        userId: this.UID,
         email: this.email,
         role: this.privilege,
         aud: this.privilege,
