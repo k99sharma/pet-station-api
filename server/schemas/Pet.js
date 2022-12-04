@@ -2,7 +2,7 @@
 import mongoose from 'mongoose';
 
 // importing utilities
-import { generateUID } from '../utilities/helper';
+import { generateUID } from '../utilities/helper.js';
 
 const { Schema } = mongoose;
 
