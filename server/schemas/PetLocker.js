@@ -16,7 +16,7 @@ const petLockerSchema = new Schema({
         required: true
     },
     locker: {
-        type: Array
+        type: [String]
     }
 },
     {
