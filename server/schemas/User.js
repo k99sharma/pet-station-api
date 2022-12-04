@@ -76,7 +76,7 @@ const userSchema = new Schema({
 });
 
 // function to set UID
-userSchema.pre('save', function (next) {
+userSchema.pre('save', function cb(next) {
     const firstName = String(this.firstName).toLowerCase();
     const lastName = String(this.lastName).toLowerCase();
 
@@ -90,7 +90,7 @@ userSchema.pre('save', function (next) {
 })
 
 // function to set password
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function cb(next) {
     // if password is already modified go to next
     if (!this.isModified('password')) return next()
 
@@ -103,7 +103,7 @@ userSchema.pre('save', async function (next) {
 })
 
 // function to check if password is valid
-userSchema.methods.isValidPassword = async function (password) {
+userSchema.methods.isValidPassword = async function cb(password) {
     try {
         return await bcryptjs.compare(password, this.password)
     } catch (error) {
@@ -112,7 +112,7 @@ userSchema.methods.isValidPassword = async function (password) {
 }
 
 // function to generate authentication token
-userSchema.methods.generateAuthToken = function () {
+userSchema.methods.generateAuthToken = function cb() {
     const token = jsonwebtoken.sign({
         userId: this.UID,
         email: this.email,
