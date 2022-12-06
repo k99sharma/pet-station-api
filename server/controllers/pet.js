@@ -136,7 +136,24 @@ export async function getAllUserPets(req, res) {
     const locker = petLocker.locker.map(id => Pet.findOne({ UID: id }));
 
     // user pets
-    const pets = await Promise.all(locker);
+    let pets = await Promise.all(locker);
+    pets = pets.map(pet => {
+        const mappedData = {
+            petId: pet.UID,
+            name: pet.name,
+            description: pet.description,
+            imageUrl: pet.imageUrl,
+            category: pet.category,
+            breed: pet.breed,
+            ownerId: pet.ownerId,
+            age: pet.age,
+            weight: pet.weight,
+            adoptionStatus: pet.adoptionStatus
+        }
+
+        return mappedData;
+    })
+
 
     return sendSuccess(
         res,
@@ -157,7 +174,7 @@ export async function getPet(req, res) {
     const { petId } = req.params;
 
     // get pet
-    const pet = await Pet.findOne({ UID: petId })
+    let pet = await Pet.findOne({ UID: petId })
 
     if (!pet)
         return sendError(
@@ -166,6 +183,19 @@ export async function getPet(req, res) {
             'Pet not found.',
             'fail'
         );
+
+    pet = {
+        petId: pet.UID,
+        name: pet.name,
+        description: pet.description,
+        imageUrl: pet.imageUrl,
+        category: pet.category,
+        breed: pet.breed,
+        ownerId: pet.ownerId,
+        age: pet.age,
+        weight: pet.weight,
+        adoptionStatus: pet.adoptionStatus
+    }
 
     return sendSuccess(
         res,
