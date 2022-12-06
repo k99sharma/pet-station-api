@@ -46,3 +46,8 @@ export function decrypt(encryptedString) {
 
     return JSON.parse(bytes);
 }
+
+// function to generate random id
+export function generateRandomID() {
+    return 'i';
+}
