@@ -49,5 +49,5 @@ export function decrypt(encryptedString) {
 
 // function to generate random id
 export function generateRandomID() {
-    return 'i';
+    return String(Date.now().toString(36));
 }
