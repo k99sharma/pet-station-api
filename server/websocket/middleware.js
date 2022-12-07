@@ -1,14 +1,17 @@
 /* eslint-disable no-param-reassign */
 
-// importing redis client
-import { getRedisClient } from '../configs/redisConnection.js';
-
 // importing helper functions
-import { generateRandomID } from '../utilities/helper.js';
+import { generateSameID } from '../utilities/helper.js';
+
+
+// importing session store
+import SessionStore from './sessionStore.js';
 
 // socket middleware
 export default function socketMiddleware(io) {
-    const redisClient = getRedisClient();   // redis client
+    const sessionStore = new SessionStore();
+
+    io.sessionStore = sessionStore;
 
     // user session middleware
     io.use(async (socket, next) => {
@@ -17,17 +20,16 @@ export default function socketMiddleware(io) {
         // if session ID is present
         if (sessionID) {
             // getting session
-            const sessionData = await redisClient.get(sessionID);
+            const sessionData = await sessionStore.getSession(sessionID);
 
             if (sessionData) {
-                const parseData = JSON.parse(sessionData);     // parsing data
-
                 // session data
-                socket.username = parseData.username;
-                socket.userID = parseData.userID;
+                socket.username = sessionData.username;
+                socket.userID = sessionData.userID;
                 socket.sessionID = sessionID;
 
             } else {
+                // TODO: Problem here if session gets expired and sessionID is being passed. We need to set expiry at client side too.  
                 console.log('Unable to access session data.');
             }
 
@@ -35,8 +37,8 @@ export default function socketMiddleware(io) {
         }
 
         // if there is no session
-        const newSessionID = generateRandomID();
-        const newUserID = generateRandomID();
+        const newSessionID = generateSameID(username);
+        const newUserID = generateSameID(username);
 
         // adding attributes to socket
         socket.sessionID = newSessionID;
