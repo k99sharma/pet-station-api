@@ -6,12 +6,15 @@ import { generateSameID } from '../utilities/helper.js';
 
 // importing session store
 import SessionStore from './sessionStore.js';
+import MessageStore from './messageStore.js';
 
 // socket middleware
 export default function socketMiddleware(io) {
     const sessionStore = new SessionStore();
+    const messageStore = new MessageStore();
 
     io.sessionStore = sessionStore;
+    io.messageStore = messageStore;
 
     // user session middleware
     io.use(async (socket, next) => {

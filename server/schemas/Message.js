@@ -17,10 +17,9 @@ const messageSchema = new Schema({
         type: String,
         required: true
     },
-    status: {
-        type: String,
+    seen: {
+        type: Boolean,
         required: 'true',
-        enum: ['sent', 'delivered']
     }
 },
     {

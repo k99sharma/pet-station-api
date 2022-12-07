@@ -2,6 +2,31 @@
 import Store from '../schemas/SessionStore.js';
 
 class SessionStore {
+    constructor() {
+        this.chatTab = new Map();
+    }
+
+    // method to check user in map
+    containsUser(userID) {
+        return this.chatTab.has(userID);
+    }
+
+    // method to get chatTab for user
+    getChatTab(userID) {
+        return this.chatTab.get(userID);
+    }
+
+    // method to set chatTab for user
+    setChatTab(userID, openedTabID) {
+        this.chatTab.set(userID, openedTabID);
+    }
+
+    // method to delete chat tab
+    deleteChatTab(userID) {
+        this.chatTab.delete(userID);
+    }
+
+    // method to get all sessions
     getAllSession() {
         this.allSession = Store.find({});
         return this.allSession;
@@ -22,7 +47,6 @@ class SessionStore {
          */
         Store.findOne({ sessionID })
             .then((session) => {
-                console.log(session);
                 if (!session) {
                     // new session is created for user
                     this.newSession = new Store({

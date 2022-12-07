@@ -1,15 +1,35 @@
+/* eslint-disable no-param-reassign */
 // socket events
 
-// importing schemas
-import Message from '../schemas/Message.js';
-
 export default async function socketEvent(socket, io) {
-    // NEW EVENT: sending session data on connection
-    const sessionData = {
+    // NEW EVENT: sending session data on connection with unseen messages
+    // get all unseen messages for user
+    let unseenMessages = await io.messageStore.getAllUnseenMessages(socket.userID);
+
+    // mapping required data
+    unseenMessages = unseenMessages.map(message => {
+        const payload = {
+            content: message.content,
+            from: message.from
+        }
+
+        return payload;
+    });
+
+    // mark all messages seen
+    io.messageStore.markMessageSeen(socket.userID);
+
+    // session payload
+    const sessionPayload = {
         sessionID: socket.sessionID,
         userID: socket.sessionID,
+        unseen: {
+            unseenMessages,
+            count: unseenMessages.length
+        }
     };
-    socket.emit('session', sessionData);
+
+    socket.emit('session', sessionPayload);     // sending back to user
 
     socket.broadcast.emit('online', {
         sessionID: socket.sessionID
@@ -21,29 +41,34 @@ export default async function socketEvent(socket, io) {
 
     socket.on('message', async ({ content, to }) => {
         // create new message
-        const message = new Message({
+        // only save message which comes to me not I send
+        const messagePayload = {
             content,
             from: socket.userID,
             to,
-            status: 'sent'
-        });
+            seen:
+                io.sessionStore.containsUser(socket.userID)
+                    ?
+                    io.sessionStore.getChatTab(to) === socket.userID
+                    :
+                    false
+        };
 
         // send message
-        socket.to(to).emit('message', message);
+        socket.to(to).emit('message', messagePayload);
 
         // save message
-        await message.save()
-            .then(() => {
-                console.log('Message saved.');
-            })
-            .catch(err => {
-                console.log('Message cannot be saved.');
-                console.error(err);
-            })
+        io.messageStore.saveMessage(messagePayload);
     });
 
-    // change message status to delivered event
+    // NEW EVENT: if sender tab is open mark all msg as delivered
+    // map to keep track of user opened tab
+    socket.on('chatTab', ({ tabID }) => {
+        // set tabID in map
+        io.sessionStore.setChatTab(socket.userID, tabID);
 
+        console.log(io.sessionStore.chatTab);
+    });
 
     // NEW EVENT: disconnect event
     socket.on('disconnect', async () => {
@@ -57,13 +82,15 @@ export default async function socketEvent(socket, io) {
                 username: socket.username,
             };
 
+            // delete userID from chat tab map
+            io.sessionStore.deleteChatTab(socket.userID);
+
             // save session
             await io.sessionStore.saveSession(socket.sessionID, modifiedSessionData);
             socket.broadcast.emit('offline', {
                 sessionID: socket.sessionID
             });  // broadcast disconnection status
         }
-
 
         console.log('user disconnected');
     });
