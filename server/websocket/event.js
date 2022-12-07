@@ -70,6 +70,11 @@ export default async function socketEvent(socket, io) {
         console.log(io.sessionStore.chatTab);
     });
 
+    // NEW EVENT: notifications
+    socket.on('notification', () => {
+        // TODO: to be implemented
+    })
+
     // NEW EVENT: disconnect event
     socket.on('disconnect', async () => {
         const matchingSockets = await io.in(socket.userID).allSockets();
