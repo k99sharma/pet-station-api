@@ -16,10 +16,6 @@ const sessionStoreSchema = new Schema({
     username: {
         type: String,
         required: true
-    },
-    connected: {
-        type: Boolean,
-        required: true
     }
 },
     {

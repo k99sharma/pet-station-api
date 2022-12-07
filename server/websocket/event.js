@@ -58,7 +58,7 @@ export default async function socketEvent(socket, io) {
             };
 
             // save session
-            io.sessionStore.saveSession(socket.sessionID, modifiedSessionData);
+            await io.sessionStore.saveSession(socket.sessionID, modifiedSessionData);
             socket.broadcast.emit('offline', {
                 sessionID: socket.sessionID
             });  // broadcast disconnection status

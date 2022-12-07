@@ -27,9 +27,7 @@ export default function socketMiddleware(io) {
                 socket.username = sessionData.username;
                 socket.userID = sessionData.userID;
                 socket.sessionID = sessionID;
-
             } else {
-                // TODO: Problem here if session gets expired and sessionID is being passed. We need to set expiry at client side too.  
                 console.log('Unable to access session data.');
             }
 
