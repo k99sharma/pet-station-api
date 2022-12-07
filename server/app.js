@@ -4,6 +4,7 @@ import compression from 'compression';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
+import http from 'http';
 
 // importing error handlers
 import { notFound, sendErrors } from './configs/errorHandlers.js';
@@ -22,8 +23,14 @@ import petRoute from './routes/pet.js';
 import adoptionRoute from './routes/adoption.js';
 import testRoute from './routes/test.js';
 
+// importing socket server
+import socketServer from './websocket/socketServer.js';
+
 // app
 const app = express();
+
+// create server
+const server = http.createServer(app);
 
 // connect database
 connectDB();
@@ -76,10 +83,14 @@ app.use((req, res, next) => {
     next();
 });
 
+// socket connection
+socketServer(server);
+
 // function to run server
 function runServer() {
     try {
-        app.listen(CONFIG.PORT || 3000);
+        // application server
+        server.listen(CONFIG.PORT || 3000);
         console.info(`${CONFIG.NODE_ENV} server is up and running on PORT: ${CONFIG.PORT}`);
     } catch (err) {
         console.info('Error in running server!');

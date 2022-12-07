@@ -46,3 +46,9 @@ export function decrypt(encryptedString) {
 
     return JSON.parse(bytes);
 }
+
+// function to generate random id
+export function generateSameID(key) {
+    const hash = CryptoJS.SHA256(key).toString();
+    return hash;
+}
