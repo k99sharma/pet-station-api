@@ -1,51 +1,34 @@
-// import error helper functions
-const { sendError } = require('../utils/errorHelper')
+// importing error helper
+import { sendError } from '../utilities/errorHelper.js';
 
-// import status codes
-const { NOT_FOUND, SERVER_ERROR } = require('../utils/statusCodes')
+// importing status codes
+import statusCodes from '../utilities/statusCodes.js';
 
-/**
- * function to catch errors in middleware functions.
- *
- * @params { function }
- *
- * @return { function }
- */
-
-module.exports.catchErrors = (middleware) => {
+// function to catch errors in middleware
+export function catchErrors(middleware) {
     return async (req, res, next) => {
         try {
-            await middleware(req, res, next)
+            await middleware(req, res, next);
         } catch (err) {
-            next(err)
+            next(err);
         }
     }
 }
 
-/**
- * function to handle not found routes.
- *
- * @params { object, object }
- *
- * @return { function }
- */
-
-module.exports.notFound = (req, res) => {
-    return sendError(res, "Route doesn't exist.", NOT_FOUND)
+// function to handle not found
+export function notFound(req, res) {
+    return sendError(
+        res,
+        statusCodes.NOT_FOUND,
+        'Route not found!',
+        'error',
+        statusCodes.NOT_FOUND
+    )
 }
 
-/**
- * custom error handler
- *
- * @params { object, object, object, object }
- *
- * @return { function }
- */
+// function to send error
+export function sendErrors(err, res) {
+    console.error(err);
 
-module.exports.sendErrors = (err, res) => {
-    // logging errors to console
-    console.error(err)
-
-    // return error
-    return sendError(res, 'Something went wrong!', err.status || SERVER_ERROR)
+    return sendError(res, 'Something went wrong!', err.status || statusCodes.SERVER_ERROR);
 }

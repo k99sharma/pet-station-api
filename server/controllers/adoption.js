@@ -1,271 +1,258 @@
-// importing modals
-const AdoptionSession = require('../models/AdoptionSession');
-const AdoptionList = require('../models/AdoptionList');
-const Pet = require('../models/Pet');
-const AdoptionRequest = require('../models/AdoptionRequest');
-const AdoptionRecord = require('../models/AdoptionRecord');
+// ADOPTION CONTROLLER
 
-// importing error handlers
-const { sendSuccess, sendError } = require('../utils/errorHelper')
+// importing schemas
+import AdoptionLocker from '../schemas/AdoptionLocker.js';
+import Adoption from '../schemas/Adoption.js';
+import Pet from '../schemas/Pet.js';
+
+// importing response format
+import { sendError, sendSuccess } from '../utilities/errorHelper.js';
+
+// importing helper functions
+import { decrypt, encrypt } from '../utilities/helper.js';
 
 // importing status codes
-const { NOT_FOUND, SERVER_ERROR, CONFLICT } = require('../utils/statusCodes')
+import statusCodes from '../utilities/statusCodes.js';
 
-
-// POST: put on adoption
-const putPetForAdoption = async (req, res) => {
-    const petId = req.params.petId;
-    const userId = req.user.userId;
-
-    // get pet and update adoption status
-    let pet = await Pet.findOneAndUpdate({ petId: petId }, {
-        adoptionStatus: 'pending'
-    })
-
-    const petDocumentId = pet._id;
-
-    // check if an adoption session is present for user
-    let adoptionSession = await AdoptionSession.findOne({ userId: userId });
-
-    // if no adoption data is found
-    if (!adoptionSession) {
-        adoptionSession = new AdoptionSession({
-            userId: userId
-        })
-
-        await adoptionSession.save()
-            .then(() => {
-                console.log('New adoption session is created for user.');
-            })
-            .catch(err => {
-                console.log('Cannot create new session for user');
-                console.error(err);
-                return sendError(res, 'Unable to put pet for adoption', SERVER_ERROR);
-            })
-    }
-
-    // get the session id
-    const sessionId = adoptionSession._id;
-
-    // check if pet is already present for adoption
-    const isAvailable = await AdoptionList.findOne({
-        sessionId: sessionId,
-        petId: petDocumentId
-    })
-
-    if (isAvailable)
-        return sendError(res, 'Pet is already available for adoption', CONFLICT);
-
-    // now we are gonna put for adoption
-    const putForAdoption = new AdoptionList({
-        sessionId: sessionId,
-        petId: petDocumentId
-    })
-
-    // save pet put for adoption
-    await putForAdoption.save()
-        .then(() => {
-            console.log('Pet is put for adoption');
-        })
-        .catch(err => {
-            console.error(err)
-            return sendError(res, 'Unable to put pet for adoption', SERVER_ERROR);
-        })
-
-    return sendSuccess(res, 'Pet is up for adoption');
-}
-
-
-// GET: get all pets up for adoption by owner
-const getAllUserPetsForAdoption = async (req, res) => {
-    const ownerId = req.params.ownerId;
-
-    // check if there is available session for user
-    const availableSession = await AdoptionSession.findOne({ userId: ownerId })
-
-    if (!availableSession)
-        return sendSuccess(res, []);
-
-    const petsList = await AdoptionList.find({
-        sessionId: String(availableSession._id)
-    }).populate('petId')
-
-
-    // response data
-    const data = []
-    for (let pet of petsList) {
-        data.push({
-            name: pet.petId.name,
-            breed: pet.petId.breed,
-            category: pet.petId.category,
-            age: pet.petId.age,
-            weight: pet.petId.weight,
-            gender: pet.petId.gender,
-            petId: pet.petId.petId,
-            ownerId: pet.petId.ownerId,
-        })
-    }
-
-    if (data.length === 0)
-        return sendSuccess(res, [])
-
-    return sendSuccess(res, data);
-}
-
-// DELETE: remove pet from adoption
-const removePet = async (req, res) => {
-    let petId = req.params.petId;
-    const ownerId = req.user.userId;
-
-    // get session id of user -> we are assuming it is always present
-    const session = await AdoptionSession.findOne({ userId: ownerId });
-    const sessionId = session._id;  // session id
-
-    const pet = await Pet.findOne({ petId: petId })
-    petId = pet._id;        // pet document Id
-
-    const adoptionInstance = await AdoptionList.findOne({
-        petId: petId,
-        sessionId: sessionId
-    })
-
-    if (!adoptionInstance)
-        return sendError(res, 'Invalid pet Id.', NOT_FOUND)
-
-    // deleting instance
-    await AdoptionList.findByIdAndDelete(adoptionInstance._id)
-        .then(() => {
-            console.log('Pet adoption instance is deleted!')
-        })
-        .catch(err => {
-            console.log('Pet adoption instance cannot be deleted')
-            console.error(err)
-            return sendError(res, 'Unable to remove pet.', SERVER_ERROR);
-        })
-
-    return sendSuccess(res, 'Pet is removed from adoption list.');
-}
-
-// POST: send adoption request
-const sendAdoptionRequest = async (req, res) => {
-    const userId = req.params.userId;
-    const { ownerId, petId } = req.body;
-
-    // request data
-    const newRequest = {
-        userId: userId,
-        petId: petId
-    }
-
-    // create adoption request 
-    let adoptionRequest = await AdoptionRequest.findOne({ userId: ownerId });
-    if (!adoptionRequest) {
-        adoptionRequest = new AdoptionRequest({
-            userId: ownerId
-        })
-
-        // save instance
-        await adoptionRequest.save()
-            .then(() => {
-                console.log('New adoption request');
-            })
-            .catch(err => {
-                console.log('Failed to make request');
-                console.error(err);
-                return sendError(res, 'Unable to send request', SERVER_ERROR);
-            })
-    }
-
-    // push request data 
-    const adoptionRequestId = adoptionRequest._id;
-    await AdoptionRequest.findByIdAndUpdate(adoptionRequestId, {
-        $push: {
-            requests: newRequest
-        }
-    })
-
-
-    return sendSuccess(res, 'Request is sent!');
-}
-
-// GET: get all pets available for adoption
-const getAllPets = async (req, res) => {
-    const adoptionList = await AdoptionList.find({}).populate('petId');
-
-    const data = []
-    for (let pet of adoptionList) {
-        data.push({
-            data: {
-                name: pet.petId.name,
-                breed: pet.petId.breed,
-                category: pet.petId.category,
-                imageUrl: pet.petId.imageUrl,
-                description: pet.petId.description,
-                age: pet.petId.age,
-                weight: pet.petId.weight,
-                ownerId: pet.petId.ownerId,
-                gender: pet.petId.gender,
-                petId: pet.petId.petId,
-            },
-            adoptionStatus: pet.isAdopted
-        })
-    }
-
-    return sendSuccess(res, data);
-}
-
-// POST: complete adoption for pet
-const completeAdoption = async (req, res) => {
+// put pet on adoption
+export async function putPetOnAdoption(req, res) {
     const { userId } = req.user;
     const { petId } = req.params;
 
-    const pet = await Pet.findOne({ petId: petId });
-
-    // create new record of adoption for user
-    const adoptionRecord = new AdoptionRecord({
-        userId: userId,
-        pet: pet
+    // set pet adoption status to pending
+    Pet.findOneAndUpdate({ userId }, {
+        adoptionStatus: 'pending'
     })
-
-    // adoption record is saved
-    await adoptionRecord.save()
         .then(() => {
-            console.log('Adoption Record is created.')
+            console.log('Pet is removed from pet locker.');
         })
         .catch(err => {
+            console.log('Pet cannot be removed from pet locker.');
             console.error(err);
-            console.log('Adoption record cannot be created.')
-            return sendError(res, 'Adoption cannot be completed.', SERVER_ERROR)
         })
 
-    // delete pet from adoption list
-    await AdoptionList.findOneAndDelete({ userId: userId })
-        .then(() => {
-            console.log('Pet is deleted from adoption list.')
-        })
-        .catch(err => {
-            console.error(err)
-            console.log('Pet cannot be deleted from adoption list.')
-        })
+    // new instance
+    const adoptionLockerInstance = new AdoptionLocker({
+        userId,
+        petId
+    });
 
-    // delete pet from pet 
-    await Pet.findOneAndDelete({ userId: userId })
+    adoptionLockerInstance.save()
         .then(() => {
-            console.log('Pet is deleted');
+            console.log('Pet is put on adoption.');
         })
         .catch(err => {
+            console.log('Pet cannot be put on adoption.');
             console.error(err);
-            console.log('pet cannot be deleted.');
+
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'Pet cannot be put on adoption.',
+                'error'
+            );
         })
 
-    return sendSuccess(res, 'Adoption is successful!');
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        'Pet put on adoption.',
+        'success'
+    );
 }
 
-module.exports = {
-    putPetForAdoption,
-    getAllUserPetsForAdoption,
-    removePet,
-    sendAdoptionRequest,
-    getAllPets,
-    completeAdoption
+// adopt pet
+export async function completeAdoption(req, res) {
+    const { userId } = req.user;
+
+    const {
+        petId,
+        userWhoAdoptedPet
+    } = req.body;
+
+    // delete pet from user pet locker
+
+    // remove pet from adoption locker
+
+    // creating new adoption required
+    const adoption = new Adoption({
+        userId,
+        petId,
+        adoptedBy: userWhoAdoptedPet
+    });
+
+    adoption.save()
+        .then(() => {
+            console.log('Adoption is completed.')
+        })
+        .catch(err => {
+            console.log('Adoption is not successful.');
+            console.error(err);
+        })
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        'Adoption is completed.',
+        'success'
+    );
+}
+
+// adoption record
+export async function getAdoptionRecord(req, res) {
+    const { userId } = req.user;
+
+    const adoptionRecord = await Adoption.find({ userId });
+
+    if ((await adoptionRecord).length === 0)
+        return sendSuccess(
+            res,
+            statusCodes.OK,
+            {
+                msg: 'No adoption record found.',
+                count: 0,
+                data: []
+            },
+            'success'
+        );
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        {
+            msg: 'Adoption record found.',
+            count: adoptionRecord.length,
+            data: adoptionRecord
+        },
+        'success'
+    );
+}
+
+// get all pets available for adoption
+export async function getPetAvailableForAdoption(req, res) {
+    // paging parameters
+    const limit = parseInt(req.query.limit, 10);
+    const { cursor } = req.query;
+
+    // response data holder
+    let petsForAdoption = [];
+
+    // if cursor is present
+    if (cursor) {
+        // decrypt the cursor
+        const decryptedCursor = decrypt(cursor);
+
+        // convert into date value
+        const decryptedDate = new Date(decryptedCursor * 1000);
+
+        // query for users according to cursor
+        petsForAdoption = await Pet.find({
+            createdAt: {
+                $lt: decryptedDate
+            }
+        })
+            .sort({ createdAt: -1 })
+            .limit(limit + 1)
+    } else {
+        petsForAdoption = await Pet.find({})
+            .sort({ createdAt: -1 })
+            .limit(limit + 1)
+    }
+
+    // checking if there are more documents
+    const hasMore = petsForAdoption.length === limit + 1;   // boolean value
+    let nextCursor = null;
+
+    // if limit is reached
+    if (hasMore) {
+        const nextCursorRecord = petsForAdoption[limit];
+
+        const unixTimestamp = Math.floor(
+            nextCursorRecord.createdAt.getTime() / 1000
+        );
+
+        nextCursor = encrypt(unixTimestamp.toString());
+
+        // removing last record from data
+        petsForAdoption.pop();
+    }
+
+
+    // mapping data to return as response
+    petsForAdoption = petsForAdoption.map(pet => {
+        const mappedData = {
+            petId: pet.UID,
+            name: pet.name,
+            description: pet.description,
+            imageUrl: pet.imageUrl,
+            category: pet.category,
+            breed: pet.breed,
+            ownerId: pet.ownerId,
+            age: pet.age,
+            weight: pet.weight,
+            adoptionStatus: pet.adoptionStatus
+        };
+
+        return mappedData;
+    });
+
+    // if no pet is present
+    if (petsForAdoption.length === 0)
+        return sendSuccess(
+            res,
+            statusCodes.OK,
+            {
+                msg: 'No pets for adoption.',
+                count: 0,
+                data: []
+            },
+            'success'
+        );
+
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        {
+            msg: 'Pet available for adoption.',
+            count: petsForAdoption.length,
+            data: petsForAdoption,
+            paging: {
+                hasMore,
+                nextCursor
+            }
+        },
+        'success'
+    );
+}
+
+// remove pet from adoption
+export async function deleteAdoptionStatus(req, res) {
+    const { petId } = req.params;
+
+    // updating pet adoption status
+    await Pet.findOneAndUpdate({ petId }, {
+        adoptionStatus: 'none'
+    })
+        .then(() => {
+            console.log('Pet is removed from adoption list.');
+        })
+        .catch(err => {
+            console.log('Pet cannot be removed from adoption list.');
+            console.error(err);
+
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'Pet cannot be removed from adoption list.',
+                'error'
+            );
+        })
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        'Pet removed from adoption list.',
+        'success'
+    );
 }

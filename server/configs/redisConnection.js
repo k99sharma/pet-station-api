@@ -1,62 +1,50 @@
-// importing modules
-const redis = require('redis')
+// importing libraries
+import redis from 'redis';
 
 // importing configs
-const {
-    REDIS_URL,
-    NODE_ENV
-} = require('./index');
+import CONFIG from './config.js';
 
-/**
- * function to create redis client.
- * @params { void }
- * @return { Object } return redis client.
- */
+let client     // global variable
 
-let client
-
-async function connectRedis() {
-    if (NODE_ENV === 'production') {
+// function to create redis connection
+export function connectRedis() {
+    if (CONFIG.NODE_ENV === 'production') {
         client = redis.createClient({
-            url: REDIS_URL
-        })
+            url: CONFIG.REDIS_URL
+        });
     } else {
-        client = redis.createClient()
+        client = redis.createClient();
     }
 
     client.on('error', (err) => {
-        console.log(err)
+        console.error(err);
     })
 
     client
         .connect()
         .then(() => {
-            console.info('Redis connected!')
+            console.info('Redis connected.');
         })
-        .catch((err) => {
-            console.info('Redis connection failed!')
-            console.error(err)
+        .catch(err => {
+            console.info('Redis connection failed.');
+            console.error(err);
         })
 }
 
-function getClient() {
-    return client
+// function to get redis client
+export function getRedisClient() {
+    return client;
 }
 
-async function disconnectClient() {
+// function to disconnect client
+export function disconnectRedisClient() {
     client
         .disconnect()
         .then(() => {
-            console.info('Redis disconnected!')
+            console.log('Redis disconnected.');
         })
-        .catch((err) => {
-            console.log('Redis failed to disconnect!')
-            console.log(err)
+        .catch(err => {
+            console.log('Redis failed to disconnect.');
+            console.error(err);
         })
-}
-
-module.exports = {
-    connectRedis,
-    getClient,
-    disconnectClient,
 }

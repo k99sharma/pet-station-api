@@ -1,222 +1,193 @@
-// importing model
-const User = require('../models/User')
-const LoginDetail = require('../models/LoginDetail')
+// USER CONTROLLERS
 
-// importing error handlers
-const { sendSuccess, sendError } = require('../utils/errorHelper')
+// importing schemas
+import User from '../schemas/User.js';
+import Username from '../schemas/Username.js';
 
 // importing status codes
-const { NOT_FOUND, BAD_REQUEST } = require('../utils/statusCodes')
+import statusCodes from '../utilities/statusCodes.js';
 
-// importing helper function
-const { encrypt, decrypt } = require('../utils/helper')
+// importing error handlers
+import { sendSuccess, sendError } from '../utilities/errorHelper.js';
 
-// GET: get user using email address
-// user(userId, firstName, lastName, username, gender, email, address)
+// importing redis client
+import { getRedisClient } from '../configs/redisConnection.js';
 
-const getUserByEmail = async (req, res) => {
-    // getting email from query
-    const email = req.query.email
+// GET: user details using UID
+export async function getUserByUID(req, res) {
+    const { userId } = req.user;
 
-    // finding user
-    const user = await User.findOne({ email: email }).populate('username')
-    if (!user || !user.active) return sendError(res, 'Invalid User.', NOT_FOUND)
+    // getting user
+    const [user, username] = await Promise.all([
+        User.findOne({ UID: userId }),
+        Username.findOne({ UID: userId })
+    ]);
 
-    // generating data to return back to client
+    console.log(user);
+    console.log(username);
+
+    // if user does not exist
+    if (!user || !user.active)
+        return sendError(
+            res,
+            statusCodes.NOT_FOUND,
+            'User does not exist.',
+            'fail'
+        );
+
+    // response data
     const data = {
-        userId: user.userId,
-        username: user.username.username,
         firstName: user.firstName,
         lastName: user.lastName,
-        gender: user.gender,
+        username:
+            username.username === null
+                ?
+                user.firstName
+                :
+                username.username,
+        profilePictureUrl: user.profilePictureUrl,
         email: user.email,
+        phoneNumber: user.phoneNumber,
         address: user.address,
-    }
+        gender: user.gender
+    };
 
-    return sendSuccess(res, data)
-}
-
-// GET: get user using userId
-// user(userId, firstName, lastName, username, gender, email, address)
-
-const getUserByUserId = async (req, res) => {
-    // getting user Id from query
-    const userId = req.query.userId
-
-    // finding user
-    const user = await User.findOne({ userId: userId }).populate('username')
-    if (!user || !user.active) return sendError(res, 'Invalid User.', NOT_FOUND)
-
-    // generating data to return back to client
-    const data = {
-        userId: user.userId,
-        username: user.username.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        gender: user.gender,
-        email: user.email,
-        address: user.address,
-    }
-
-    return sendSuccess(res, data)
-}
-
-// GET: check if user exists using email address
-// returns boolean value
-
-const isUserValid = async (req, res) => {
-    const email = req.query.email
-
-    const user = await User.findOne({ email: email })
-
-    if (!user || !user.active) return sendSuccess(res, false, NOT_FOUND)
-
-    return sendSuccess(res, true)
-}
-
-// PUT: update user data
-// update(first name, last name, address, gender)
-
-const updateUser = async (req, res) => {
-    // getting data type and userId
-    const userId = req.user.userId
-    const { type } = req.params
-    const data = req.body
-
-    // check if user id is valid
-    const user = await User.findOne({ userId: userId })
-    if (!user || !user.active) return sendError(res, 'Invalid User.', NOT_FOUND)
-
-    let updatedData = {}
-
-    // data based on type
-    switch (type) {
-        case 'firstName':
-            updatedData = { firstName: data.firstName }
-            break
-
-        case 'lastName':
-            updatedData = { lastName: data.lastName }
-            break
-
-        case 'address':
-            updatedData = { address: data.address }
-            break
-
-        case 'gender':
-            updatedData = { address: data.gender }
-            break
-
-        default:
-            return sendError(res, 'Invalid type of data.', BAD_REQUEST)
-    }
-
-    // if no data is present
-    if (Object.keys(data).length == 0)
-        return sendError(res, 'Data not found.', BAD_REQUEST)
-
-    // update data
-    await User.findOneAndUpdate({ userId: userId }, updatedData)
-
-    return sendSuccess(res, 'Update successful.')
-}
-
-// GET: login details
-const getLoginDetails = async (req, res) => {
-    const userId = req.params.userId
-
-    const loginRecord = await LoginDetail.findOne({ userId: userId })
-
-    if (!loginRecord)
-        return sendError(res, 'No login details found.', NOT_FOUND)
-
-    return sendSuccess(res, loginRecord)
-}
-
-// DELETE: delete user using user id
-
-const deleteUser = async (req, res) => {
-    // get user id from params
-    const userId = req.user.userId
-
-    // check if user exists
-    const user = await User.findOne({ userId: userId })
-    if (!user || user.active) return sendError(res, 'Invalid User.', NOT_FOUND)
-
-    // make user inactive
-    await User.findOneAndUpdate({ userId: userId }, { active: false })
-
-    return sendSuccess(res, 'User deleted.')
-}
-
-// GET: get all user using cursor and limit
-const getAllUsers = async (req, res) => {
-    // get all the query parameter
-    const limit = parseInt(req.query.limit) // convert into Number
-    const cursor = req.query.cursor
-
-    let userCollection // store query result
-
-    // if cursor is present
-    if (cursor) {
-        // decrypt the cursor using decryption function
-        const decryptedCursor = decrypt(cursor)
-
-        // convert decrypted value into date format
-        const decryptedDate = new Date(decryptedCursor * 1000)
-
-        // query for users according to cursor
-        userCollection = await User.find({
-            createdAt: {
-                $lt: decryptedDate,
-            },
-        })
-            .sort({ createdAt: -1 }) // descending order
-            .limit(limit + 1) // getting +1 of what we need
-    } else {
-        // if cursor is not present
-        userCollection = await User.find({})
-            .sort({ createdAt: -1 })
-            .limit(limit + 1)
-    }
-
-    // checking if there are more documents
-    const hasMore = userCollection.length === limit + 1
-    let nextCursor = null
-
-    // if limit is reached
-    if (hasMore) {
-        // getting last record from query result
-        // needed to find nextCursor and send it in response
-        const nextCursorRecord = userCollection[limit]
-
-        var unixTimestamp = Math.floor(
-            nextCursorRecord.createdAt.getTime() / 1000
-        )
-
-        // encrypt cursor
-        nextCursor = encrypt(unixTimestamp.toString())
-
-        // removing last record from users data
-        userCollection.pop()
-    }
-
-    // sending response
-    return sendSuccess(res, {
-        data: userCollection,
-        paging: {
-            hasMore,
-            nextCursor,
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        {
+            msg: 'User found.',
+            data
         },
-    })
+        'success'
+    );
 }
 
-module.exports = {
-    getUserByEmail,
-    getUserByUserId,
-    getAllUsers,
-    isUserValid,
-    getLoginDetails,
-    updateUser,
-    deleteUser,
+// PUT: update username
+export async function changeUsername(req, res) {
+    const { userId } = req.user;
+    const { newUsername } = req.body;
+
+    Username.findOneAndUpdate({ UID: userId }, {
+        username: newUsername
+    })
+        .then(() => {
+            console.log('Username is updated.');
+        })
+        .catch(err => {
+            console.log('Username cannot be updated.');
+            console.error(err);
+
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'Username cannot be updated.',
+                'error'
+            );
+        })
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        'Username updated.',
+        'success'
+    );
+}
+
+// PUT: update user details
+export async function updateUser(req, res) {
+    const { userId } = req.user;
+    const updateData = req.body;
+
+    User.findOneAndUpdate({ UID: userId }, updateData)
+        .then(() => {
+            console.log('User data updated.');
+        })
+        .catch(err => {
+            console.log('User data cannot be updated.');
+            console.error(err);
+
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'User data cannot be updated.',
+                'error'
+            );
+        })
+
+    return sendSuccess(
+        res,
+        statusCodes.UPDATED,
+        'User can be updated.',
+        'success'
+    );
+}
+
+// DELETE: delete user
+export async function deleteUser(req, res) {
+    const { userId } = req.user;
+
+    // delete token
+    const token = req.header('x-auth-token');
+    // delete token from redis
+    const redisClient = getRedisClient();
+    // eslint-disable-next-line consistent-return
+    redisClient.del(token)
+        .then(() => {
+            console.log('Token is deleted.');
+
+            User.findOneAndUpdate({ UID: userId }, {
+                active: false
+            })
+                .then(() => {
+                    console.log('User active status made inactive.');
+                })
+                .catch(err => {
+                    console.log('User active state cannot be changed.');
+                    console.error(err);
+
+                    return sendError(
+                        res,
+                        statusCodes.SERVER_ERROR,
+                        'User cannot be deleted.',
+                        'error'
+                    );
+                })
+        })
+        .catch(err => {
+            console.log('Token cannot be deleted.');
+            console.error(err);
+
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'User cannot be deleted.',
+                'error'
+            );
+        })
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        'User is deleted.',
+        'success'
+    );
+}
+
+// GET: check if username is valid
+export async function verifyUsername(req, res) {
+    const { username } = req.body;
+
+    // check if username is already in use
+    const isPresent = await Username.findOne({ username });
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        {
+            msg: isPresent ? 'Username is not valid.' : 'Username is valid.',
+            valid: !isPresent
+        },
+        'success'
+    );
 }

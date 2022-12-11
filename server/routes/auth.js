@@ -1,35 +1,43 @@
-// importing modules
-const express = require('express')
-const router = express.Router()
+// importing libraries
+import express from 'express';
 
 // importing error handlers
-const { catchErrors } = require('../configs/errorHandlers')
+import { catchErrors } from '../configs/errorHandlers.js';
 
 // importing controllers
-const CONTROLLERS = require('../controllers/auth')
+import {
+    signup,
+    login,
+    resetPassword,
+    extendToken,
+    logout
+} from '../controllers/auth.js';
 
-// importing middlewares
-const { allAuth } = require('../middleware/auth');
+const router = express.Router();
 
 /**
- * Provided routes for authentication
- *
- * Login route.
- * Signup route.
- * Logout route.
- * Token Extension route.
+ * Available routes.
+ * 
+ * POST: sign up
+ * POST: login
+ * POST: reset password
+ * GET: extend token
+ * POST: logout
  */
 
-// POST: user signup
-router.post('/signup', catchErrors(CONTROLLERS.userSignup))
+// POST: sign up
+router.post('/signup', catchErrors(signup));
 
-// POST: user login
-router.post('/login', catchErrors(CONTROLLERS.userLogin))
+// POST: login
+router.post('/login', catchErrors(login));
 
-// POST: user logout
-router.post('/logout/:token', catchErrors(CONTROLLERS.userLogout))
+// POST: reset password
+router.post('/password/reset', catchErrors(resetPassword));
 
-// GET: token extend
-router.get('/token/extend', allAuth, catchErrors(CONTROLLERS.extendToken))
+// GET: extend token
+router.get('/token/extend', catchErrors(extendToken));
 
-module.exports = router
+// POST: logout
+router.post('/logout/:token', catchErrors(logout));
+
+export default router;

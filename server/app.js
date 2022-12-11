@@ -1,101 +1,100 @@
-// import modules
-const express = require('express')
-const compression = require('compression')
-const morgan = require('morgan')
-const helmet = require('helmet')
-const cors = require('cors')
-
-// configuring environment variables
-require('dotenv').config()
-
-// importing configurations
-const { NODE_ENV, PORT } = require('./configs/index')
+// importing libraries
+import express from 'express';
+import compression from 'compression';
+import morgan from 'morgan';
+import helmet from 'helmet';
+import cors from 'cors';
+import http from 'http';
 
 // importing error handlers
-const { notFound, sendErrors } = require('./configs/errorHandlers')
+import { notFound, sendErrors } from './configs/errorHandlers.js';
+
+// importing configs
+import CONFIG from './configs/config.js';
+
+// importing database and redis
+import connectDB from './configs/dbConnection.js';
+import { connectRedis } from './configs/redisConnection.js';
+
+// importing routes
+import authRoute from './routes/auth.js';
+import userRoute from './routes/user.js';
+import petRoute from './routes/pet.js';
+import adoptionRoute from './routes/adoption.js';
+import testRoute from './routes/test.js';
+
+// importing socket server
+import socketServer from './websocket/socketServer.js';
 
 // app
-const app = express()
+const app = express();
 
-// configuring database connection
-require('./configs/dbConnection')
+// create server
+const server = http.createServer(app);
 
-// configuring redis connection
-const { connectRedis } = require('./configs/redisConnection')
-connectRedis()
+// connect database
+connectDB();
 
-// setting up middleware
-app.use(compression()) // compression middleware
-app.use(morgan('dev')) // morgan middleware
-app.use(helmet()) // helmet middleware
+// connect redis
+connectRedis();
 
-// cors
-app.use(cors({ exposedHeaders: 'x-auth-token' }))
+// configuring middleware
+app.use(morgan('combined'));      // morgan
+app.use(compression());     // compression
+app.use(helmet());      // helmet
+app.use(cors({ exposedHeaders: 'x-auth-token' }));      // cors
 
 // urlencoded parsing
-app.use(
-    express.urlencoded({
-        limit: '50mb',
-        extended: true,
-        parameterLimit: 1000000,
-    })
-)
-
-// json parsing
-app.use(
-    express.json({
-        limit: '50mb',
-        extended: true,
-        parameterLimit: 1000000,
-    })
-)
+app.use(express.json({
+    limit: '50mb',
+    extended: true,
+    parameterLimit: 1000000
+}));
 
 // setting up production console errors
-if (NODE_ENV === 'production')
-    console.log = console.warn = console.error = () => { }
+if (CONFIG.NODE_ENV === 'production') {
+    console.log = () => { }
+    console.warn = () => { }
+    console.error = () => { }
+}
 
-// setting up routes
-app.use('/petstation/user', require('../server/routes/user')) // user route
-app.use('/petstation/username', require('../server/routes/username')) // username route
-app.use('/petstation/pet', require('../server/routes/pet'))        // pet routes
-app.use('/petstation', require('../server/routes/auth'))        // authentication route
-app.use('/petstation/adoption', require('../server/routes/adoption'))       // adoption route
-app.use('/petstation/test', require('../server/routes/test')) // test route
+// configuring routes
+app.use(`/${CONFIG.VERSION}/auth`, authRoute);
+app.use(`/${CONFIG.VERSION}/user`, userRoute);
+app.use(`/${CONFIG.VERSION}/pet`, petRoute);
+app.use(`/${CONFIG.VERSION}/adoption`, adoptionRoute);
+app.use(`/${CONFIG.VERSION}`, testRoute);
 
-app.use('*', notFound) // route not found
+app.use('*', notFound);     // invalid route
 
-// error handlers
-app.use(sendErrors)
+// error handler
+app.use(sendErrors);
 
 // allowing headers
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*')
+    res.header('Access-Control-Allow-Origin', '*');
     res.header(
         'Access-Control-Allow-Headers',
         'Origin, X-Requested-With, Content-Type, Accept'
-    )
-    res.header('Access-Control-Allow-Credentials', true)
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE')
+    );
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
 
-    next()
-})
+    next();
+});
 
-/**
- * function to create server.
- *
- * @param { void }
- * @return { void }
- */
+// socket connection
+socketServer(server);
+
+// function to run server
 function runServer() {
     try {
-        app.listen(PORT || 3000)
-        console.info(`${NODE_ENV} server is up and running on PORT: ${PORT}.`)
+        // application server
+        server.listen(CONFIG.PORT || 3000);
+        console.info(`${CONFIG.NODE_ENV} server is up and running on PORT: ${CONFIG.PORT}`);
     } catch (err) {
-        console.info('Error in running server.')
+        console.info('Error in running server!');
     }
 }
 
-// exporting functions
-module.exports = () => {
-    runServer()
-}
+export default () => { runServer() }

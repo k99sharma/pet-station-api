@@ -1,155 +1,279 @@
-// importing model
-const Pet = require('../models/Pet')
+// PET CONTROLLERS
 
-// importing error handlers
-const { sendSuccess, sendError } = require('../utils/errorHelper')
+// importing schemas
+import Pet from '../schemas/Pet.js';
+import PetLocker from '../schemas/PetLocker.js';
+
+// importing response handlers
+import { sendError, sendSuccess } from '../utilities/errorHelper.js';
 
 // importing status codes
-const { NOT_FOUND, SERVER_ERROR } = require('../utils/statusCodes')
+import statusCodes from '../utilities/statusCodes.js';
 
-// POST: create new pet.
-const createPet = async (req, res) => {
-    const {
-        name,
-        breed,
-        imageUrl,
-        description,
-        category,
-        age,
-        weight,
-        ownerId,
-        gender
-    } = req.body;
+// create new pet
+export async function createNewPet(req, res) {
+    // getting user Id 
+    const { userId } = req.user;
 
-    // creating new pet
-    const newPet = new Pet({
-        name: name,
-        breed: breed.toLowerCase(),
-        imageUrl: imageUrl,
-        description: description,
-        category: category.toLowerCase(),
-        age: age,
-        weight: weight,
-        ownerId: ownerId,
-        gender: gender.toLowerCase()
+    // new pet instance
+    let newPet = new Pet({
+        ownerId: userId,
+        ...req.body
     });
 
-    // saving new pet
-    newPet.save()
-        .then(() => {
-            console.info(newPet);
-            return sendSuccess(res, 'Pet created.');
+    // get user pet locker
+    let petLocker = await PetLocker.findOne({ userId });
+
+    // check if user have locker or not
+    if (petLocker === null) {
+        // save the pet
+        newPet = await newPet.save();
+        if (newPet) {
+            console.log('New pet is created.');
+        } else {
+            console.log('New pet cannot be created.');
+
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'New pet cannot be created.',
+                'error'
+            );
+        }
+
+        // create new locker
+        petLocker = new PetLocker({ userId })
+        petLocker.locker.push(newPet.UID);      // add pet id in locker
+
+        // save locker
+        petLocker.save()
+            .then(() => {
+                console.log('Pet added in locker.');
+            })
+            .catch(err => {
+                console.log('Pet cannot be added in locker.');
+                console.error(err);
+            })
+    } else {
+        // check if locker reach its limit
+        if (petLocker.locker.length === 5)
+            return sendError(
+                res,
+                statusCodes.NOT_ACCEPTABLE,
+                'Maximum pets limit reached.',
+                'fail'
+            );
+
+
+        // save the pet
+        newPet = await newPet.save();
+        if (newPet) {
+            console.log('New pet is created.');
+        } else {
+            console.log('New pet cannot be created.');
+
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'New pet cannot be created.',
+                'error'
+            );
+        }
+
+        // add pet id into locker
+        PetLocker.findOneAndUpdate({ userId }, {
+            $push: {
+                locker: newPet.UID
+            }
         })
-        .catch((err) => {
-            console.error(err);
-            return sendError(res, 'Pet cannot be created.', SERVER_ERROR);
-        })
-}
+            .then(() => {
+                console.log('Pet added in locker.');
+            })
+            .catch(err => {
+                console.log('Pet cannot be added in locker.');
+                console.error(err);
 
-// GET: get pet using pet id
-const getPetById = async (req, res) => {
-    // getting pet Id
-    const petId = req.params.petId;
-
-    const pet = await Pet.findOne({ petId: petId });
-    console.log(pet);
-    // if pet not found
-    if (!pet)
-        return sendError(res, 'Invalid pet Id.', NOT_FOUND);
-
-    // creating response
-    const data = {
-        name: pet.name,
-        breed: pet.breed,
-        category: pet.category,
-        age: pet.age,
-        weight: pet.weight,
-        ownerId: pet.ownerId,
-        gender: pet.gender
+                return sendError(
+                    res,
+                    statusCodes.SERVER_ERROR,
+                    'Pet cannot be created.',
+                    'error'
+                );
+            })
     }
 
-    return sendSuccess(res, data);
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        'Pet is created.',
+        'success'
+    )
 }
 
-// GET: get pet using user id
-const getPetByOwnerId = async (req, res) => {
-    // getting owner id
-    const ownerId = req.params.ownerId;
+// get all user pets using user Id
+export async function getAllUserPets(req, res) {
+    // getting user Id
+    const { userId } = req.user;
 
-    // console.log(userId);
+    // finding locker
+    const petLocker = await PetLocker.findOne({ userId });
 
-    const petsCollection = await Pet.find({ ownerId: ownerId });
+    // if locker is not present or locker is empty
+    if (!petLocker || petLocker.locker.length === 0)
+        return sendSuccess(
+            res,
+            statusCodes.OK,
+            {
+                msg: 'No available pets.',
+                data: {
+                    count: 0,
+                    pets: []
+                }
+            }
+        );
 
-    console.log(petsCollection);
+    // getting all pets from id
+    const locker = petLocker.locker.map(id => Pet.findOne({ UID: id }));
 
-    // if no pets are found
-    if (petsCollection.length === 0)
-        return sendSuccess(res, []);
+    // user pets
+    let pets = await Promise.all(locker);
+    pets = pets.map(pet => {
+        const mappedData = {
+            petId: pet.UID,
+            name: pet.name,
+            description: pet.description,
+            imageUrl: pet.imageUrl,
+            category: pet.category,
+            breed: pet.breed,
+            ownerId: pet.ownerId,
+            age: pet.age,
+            weight: pet.weight,
+            adoptionStatus: pet.adoptionStatus
+        }
 
-    // creating response
-    // TODO: need to change the structure of json format
-    // data hiding from client side
-    const data = petsCollection;
+        return mappedData;
+    })
 
-    return sendSuccess(res, data);
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        {
+            msg: 'Available pets.',
+            data: {
+                count: pets.length,
+                pets
+            }
+        },
+        'success'
+    );
 }
 
-// GET: get owner Id using pet Id
-const getOwnerId = async (req, res) => {
-    // getting pet Id
-    const petId = req.params.petId;
+// get pet using UID
+export async function getPet(req, res) {
+    const { petId } = req.params;
 
-    // checking if pet Id is valid
-    const pet = await Pet.findOne({ petId: petId });
+    // get pet
+    let pet = await Pet.findOne({ UID: petId })
+
     if (!pet)
-        return sendError(res, 'Invalid pet Id.', NOT_FOUND);
+        return sendError(
+            res,
+            statusCodes.NOT_FOUND,
+            'Pet not found.',
+            'fail'
+        );
 
+    pet = {
+        petId: pet.UID,
+        name: pet.name,
+        description: pet.description,
+        imageUrl: pet.imageUrl,
+        category: pet.category,
+        breed: pet.breed,
+        ownerId: pet.ownerId,
+        age: pet.age,
+        weight: pet.weight,
+        adoptionStatus: pet.adoptionStatus
+    }
 
-    const ownerId = pet.ownerId;
-
-    return sendSuccess(res, ownerId);
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        {
+            msg: 'Pet found.',
+            pet
+        },
+        'success'
+    );
 }
 
-// PUT: edit pet using pet id
-const updatePet = async (req, res) => {
-    // getting pet id
-    const petId = req.params.petId;
+// delete pet using UID
+export async function deletePet(req, res) {
+    const { petId } = req.params;
+    const { userId } = req.user;
 
-    // getting updatable data
-    const data = req.body;
+    PetLocker.findOneAndUpdate({ userId }, {
+        $pull: {
+            locker: petId
+        }
+    })
+        .then(() => {
+            console.log('Pet is removed from locker.')
 
-    // checking if pet exists
-    let pet = await Pet.findOne({ petId: petId })
+            Pet.findOneAndDelete({ UID: petId })
+                .then(() => {
+                    console.log('Pet is deleted.');
+                })
+                .catch(err => {
+                    console.log('Pet cannot be deleted.');
+                    console.error(err);
+                })
+        })
+        .catch(err => {
+            console.log('Pet cannot be removed from locker.');
+            console.error(err);
+
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'Pet cannot be deleted',
+                'error'
+            );
+        })
+
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        'Pet is deleted.',
+        'success'
+    );
+}
+
+// get owner Id
+export async function getOwnerId(req, res) {
+    const { petId } = req.params;
+
+    // get pet
+    const pet = await Pet.findOne({ UID: petId });
+
+    // if pet not found
     if (!pet)
-        return sendError(res, 'Invalid pet Id.', NOT_FOUND);
+        return sendError(
+            res,
+            statusCodes.NOT_FOUND,
+            'Pet not found.',
+            'fail'
+        );
 
-    // update pet data
-    pet = await Pet.findOneAndUpdate({ petId: petId }, data);
-
-    return sendSuccess(res, 'Update successful.');
-}
-
-// DELETE: delete pet using pet id
-const deletePet = async (req, res) => {
-    // getting pet id
-    const petId = req.params.petId;
-
-    // check if pet is valid
-    let pet = await Pet.findOne({ petId: petId });
-    if (!pet)
-        return sendError(res, 'Invalid pet Id.', NOT_FOUND);
-
-    // deleting pet using its id
-    pet = await Pet.findOneAndDelete({ petId: petId });
-
-    return sendSuccess(res, 'Pet is deleted.');
-}
-
-module.exports = {
-    createPet,
-    getPetById,
-    getOwnerId,
-    getPetByOwnerId,
-    updatePet,
-    deletePet
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        {
+            msg: 'Owner Id',
+            ownerId: pet.ownerId
+        },
+        'success'
+    );
 }

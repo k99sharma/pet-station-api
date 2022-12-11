@@ -1,44 +1,47 @@
-// importing modules
-const express = require('express');
-const router = express.Router();
+// importing libraries
+import express from 'express';
 
 // importing error handlers
-const { catchErrors } = require('../configs/errorHandlers')
+import { catchErrors } from '../configs/errorHandlers.js';
 
 // importing controllers
-const CONTROLLERS = require('../controllers/pet')
+import {
+    createNewPet,
+    getAllUserPets,
+    getPet,
+    deletePet,
+    getOwnerId
+} from '../controllers/pet.js';
 
 // importing middleware
-const { allAuth } = require('../middleware/auth');
+import { allAuth } from '../middleware/auth.js';
+
+const router = express.Router();
 
 /**
- * Provided routes for authentication
- *
- * Create new pet.
- * Get pet using pet Id.
- * Get all pets using owner Id.
- * Get user Id of pet.
- * Edit pet.
- * Delete pet.
+ * Available routes.
+ * 
+ * Create new pet
+ * get all user pets using user Id
+ * get pet using UID
+ * delete pet using pet UID
+ * get owner Id
  */
 
 // POST: create new pet
-router.post('/create', allAuth, catchErrors(CONTROLLERS.createPet));
+router.post('/create', allAuth, catchErrors(createNewPet));
 
-// GET: get pet using pet id
-router.get('/get/:petId', allAuth, catchErrors(CONTROLLERS.getPetById));
+// GET: get all user pets using user Id
+router.get('/get-all', allAuth, catchErrors(getAllUserPets));
 
-// GET: get pet using owner id
-router.get('/getAll/:ownerId', allAuth, catchErrors(CONTROLLERS.getPetByOwnerId));
+//  GET: get pet using UID
+router.get('/get/:petId', allAuth, catchErrors(getPet));
 
-// GET: get user Id of pet
-router.get('/getOwnerId/:petId', allAuth, catchErrors(CONTROLLERS.getOwnerId));
+// DELETE: delete pet using UID
+router.delete('/delete/:petId', allAuth, catchErrors(deletePet));
 
-// PUT: edit pet data
-router.put('/update/:petId', allAuth, catchErrors(CONTROLLERS.updatePet));
-
-// DELETE: delete pet 
-router.delete('/delete/:petId', allAuth, catchErrors(CONTROLLERS.deletePet));
+// GET: get owner Id
+router.get('/get-owner-id/:petId', allAuth, catchErrors(getOwnerId));
 
 
-module.exports = router;
+export default router;

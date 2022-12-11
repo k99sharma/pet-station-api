@@ -1,21 +1,20 @@
-// importing modules
-const jwt = require('jsonwebtoken')
+// importing libraries
+import jsonwebtoken from 'jsonwebtoken';
 
 // importing defined constants
-const { JWT_PRIVATE_KEY } = require('../configs/index')
+import CONFIG from '../configs/config.js'
 
 // importing error helpers
-const { sendError } = require('../utils/errorHelper')
+import { sendError } from '../utilities/errorHelper.js';
 
 // importing status codes
-const { NOT_AUTHORIZED } = require('../utils/statusCodes')
+import statusCodes from '../utilities/statusCodes.js';
 
 // redis client
-const { getClient } = require('../configs/redisConnection')
-const client = getClient()
+import { getRedisClient } from '../configs/redisConnection.js';
 
 // authentication for all users
-const allAuth = async (req, res, next) => {
+export async function allAuth(req, res, next) {
     // getting token
     const token = req.header('x-auth-token')
 
@@ -23,30 +22,41 @@ const allAuth = async (req, res, next) => {
     if (!token)
         return sendError(
             res,
+            statusCodes.NOT_AUTHORIZED,
             'Access Denied. No token provided.',
-            NOT_AUTHORIZED
-        )
+            'fail'
+        );
 
     // check if token is in cache or not
-    const isAvailable = await client.get(token)
+    const redisClient = getRedisClient();
+    const isAvailable = await redisClient.get(token)
     if (isAvailable !== 'true')
-        return sendError(res, 'Access Denied. Invalid token.', NOT_AUTHORIZED)
+        return sendError(
+            res,
+            statusCodes.NOT_AUTHORIZED,
+            'Access Denied. Invalid token.',
+            'fail'
+        );
 
     // decoding payload
-    let decodedPayload
+    let decodedPayload;
 
     try {
-        decodedPayload = jwt.verify(token, JWT_PRIVATE_KEY)
+        decodedPayload = jsonwebtoken.verify(token, CONFIG.JWT_PRIVATE_KEY)
     } catch (err) {
-        return sendError(res, err, NOT_AUTHORIZED)
+        return sendError(res,
+            statusCodes.NOT_AUTHORIZED,
+            err,
+            'fail'
+        );
     }
 
-    req.user = decodedPayload
-    return next()
+    req.user = decodedPayload;
+    return next();
 }
 
 // authentication for admin
-const adminAuth = async (req, res, next) => {
+export async function adminAuth(req, res, next) {
     // getting token
     const token = req.header('x-auth-token')
 
@@ -54,34 +64,46 @@ const adminAuth = async (req, res, next) => {
     if (!token)
         return sendError(
             res,
+            statusCodes.NOT_AUTHORIZED,
             'Access Denied. No token provided',
-            NOT_AUTHORIZED
+            'fail'
         )
 
     // check if token is in cache or not
-    const isAvailable = await client.get(token)
+    const redisClient = getRedisClient();
+    const isAvailable = await redisClient.get(token);
     if (isAvailable !== 'true')
-        return sendError(res, 'Access Denied. Invalid token.', NOT_AUTHORIZED)
+        return sendError(
+            res,
+            statusCodes.NOT_AUTHORIZED,
+            'Access Denied. Invalid token.',
+            'fail'
+        );
 
     // decoding payload
-    let decodedPayload
+    let decodedPayload;
 
     try {
-        decodedPayload = jwt.verify(token, JWT_PRIVATE_KEY)
+        decodedPayload = jsonwebtoken.verify(token, CONFIG.JWT_PRIVATE_KEY);
     } catch (err) {
-        return sendError(res, err, NOT_AUTHORIZED)
+        return sendError(
+            res,
+            statusCodes.SERVER_ERROR,
+            err,
+            'error'
+        );
     }
 
     // check for admin
     if (decodedPayload.role === 'admin') {
-        req.user = decodedPayload
-        return next()
+        req.user = decodedPayload;
+        return next();
     }
 
-    return sendError(res, 'Forbidden', NOT_AUTHORIZED)
-}
-
-module.exports = {
-    allAuth,
-    adminAuth,
+    return sendError(
+        res,
+        statusCodes.NOT_AUTHORIZED,
+        'Forbidden.',
+        'fail'
+    );
 }

@@ -1,29 +1,33 @@
-// importing modules
-const cluster = require('cluster')
-const os = require('os')
-const runServer = require('./app')
+// importing libraries
+import cluster from 'cluster'
+import os from 'os'
 
-// condition to check if current process is master.
-if (cluster.isMaster) {
-    // condition to check if current environment is production or not.
-    if (process.env.NODE_ENV === 'production') {
-        // get total CPU cores count.
-        const cpuCount = os.cpus().length
+// importing configs
+import CONFIG from './configs/config.js'
 
-        // spawn a worker for every available core.
-        for (let cpu = 0; cpu < cpuCount; cpu++) {
-            cluster.fork()
-        }
+// function to run server
+import runServer from './app.js'
+
+// if current process is master
+if (cluster.isPrimary) {
+    // if environment is production
+    if (CONFIG.NODE_ENV === 'production') {
+        // get total CPU cores count
+        const cpuCount = os.cpus().length;
+
+        // spawn a worker for every available core
+        // eslint-disable-next-line no-plusplus
+        for (let cpu = 0; cpu < cpuCount; cpu++)
+            cluster.fork();
     } else {
-        cluster.fork()
+        cluster.fork();
     }
 } else {
-    // run server.
-    runServer()
+    runServer();
 }
 
 // create new worker if any one is dead.
-cluster.on('exit', function (worker) {
+cluster.on('exit', worker => {
     console.warn(`Worker ${worker.id} died.`)
     console.log('Starting new worker!')
 

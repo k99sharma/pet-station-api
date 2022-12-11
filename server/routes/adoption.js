@@ -1,47 +1,47 @@
-// importing modules
-const express = require('express');
-const router = express.Router();
+// importing libraries
+import express from 'express';
 
 // importing error handlers
-const { catchErrors } = require('../configs/errorHandlers')
+import { catchErrors } from '../configs/errorHandlers.js';
 
 // importing controllers
-const CONTROLLERS = require('../controllers/adoption')
+import {
+    putPetOnAdoption,
+    completeAdoption,
+    getAdoptionRecord,
+    getPetAvailableForAdoption,
+    deleteAdoptionStatus
+} from '../controllers/adoption.js';
 
 // importing middleware
-const { allAuth } = require('../middleware/auth');
+import { allAuth } from '../middleware/auth.js';
+
+const router = express.Router();
 
 /**
- * Provided routes for authentication
+ * Available routes.
+ *
+ * put pet on adoption 
+ * adopt pet
+ * get all adoption record of user
+ * remove pet from adoption
+ * complete adoption
  * 
- * Put pet on adoption -> done
- * Get all available pet for adoption
- * Adopt a pet
- * Remove pet from adoption -> done
- * Check adoption history
- * Get all pet put on adoption using owner Id -> done
- * Get all adopted pets using owner Id
- * Send adoption request -> done
- * Accept adoption request
  */
 
+// POST: put pet on adoption
+router.post('/put-pet-on-adoption/:petId', allAuth, catchErrors(putPetOnAdoption));
 
-// POST: put pet for adoption
-router.post('/putPetForAdoption/:petId', allAuth, catchErrors(CONTROLLERS.putPetForAdoption));
+// POST: adopt pet
+router.post('/complete-adoption', allAuth, catchErrors(completeAdoption));
 
-// GET: see all user available pet for adoption
-router.get('/get/allUserPetsForAdoption/:ownerId', allAuth, catchErrors(CONTROLLERS.getAllUserPetsForAdoption));
+// GET: get all adoption record of user
+router.get('/record', allAuth, catchErrors(getAdoptionRecord));
 
-// DELETE: remove pet from adoption list
-router.delete('/delete/:petId', allAuth, catchErrors(CONTROLLERS.removePet));
+// GET: all pets available for adoption
+router.get('/get-all-pets', allAuth, catchErrors(getPetAvailableForAdoption));
 
-// POST: make an adoption request
-router.post('/adoptionRequest/send/:userId', allAuth, catchErrors(CONTROLLERS.sendAdoptionRequest));
+// DELETE: delete pet for adoption
+router.delete('/delete/:petId', allAuth, catchErrors(deleteAdoptionStatus));
 
-// GET: get all pets available for adoption
-router.get('/getAllPets', allAuth, catchErrors(CONTROLLERS.getAllPets));
-
-// POST: complete adoption
-router.post('/complete/:petId', allAuth, catchErrors(CONTROLLERS.completeAdoption));
-
-module.exports = router;
+export default router;

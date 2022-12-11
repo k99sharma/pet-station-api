@@ -1,9 +1,9 @@
-// importing modules
-const express = require('express')
-const router = express.Router()
+// importing libraries
+import express from 'express';
 
-router.get('/', (req, res) => {
-    res.status(200).end('Routes are working')
-})
+const router = express.Router();
 
-module.exports = router
+// test route
+router.get('/test', (req, res) => res.send('Test route is working'))
+
+export default router;

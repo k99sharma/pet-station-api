@@ -1,55 +1,47 @@
-// importing modules
-const express = require('express')
-const router = express.Router()
+// importing libraries
+import express from 'express';
 
 // importing error handlers
-const { catchErrors } = require('../configs/errorHandlers')
-
-// importing controllers
-const CONTROLLERS = require('../controllers/user')
+import { catchErrors } from '../configs/errorHandlers.js';
 
 // importing middleware
-const { allAuth, adminAuth } = require('../middleware/auth')
+import { allAuth } from '../middleware/auth.js';
+
+// importing controllers
+import {
+    getUserByUID,
+    changeUsername,
+    updateUser,
+    deleteUser,
+    verifyUsername
+} from '../controllers/user.js';
+
+const router = express.Router();
 
 /**
- * Provided routes for user
- *
- * Get user using email address. -> admin
- * Get user using user Id -> all
- * Check if user is valid or not -> admin
- * Get user login details -> admin
- * Update user details. -> all
- * Delete user details. -> all
+ * Available routes.
+ * 
+ * GET: get user details using UID
+ * PUT: change username
+ * PUT: change profile picture
+ * PUT: update user details
+ * DELETE: delete user
+ * GET: check if username is valid or not
  */
 
+// GET: get user details using UID
+router.get('/get', allAuth, catchErrors(getUserByUID));
 
-// GET: user using email address
-router.get(
-    '/getUserByEmail',
-    adminAuth,
-    catchErrors(CONTROLLERS.getUserByEmail)
-)
+// PUT: username update
+router.put('/update-username', allAuth, catchErrors(changeUsername));
 
-// GET: user using userId
-router.get('/getUserById', allAuth, catchErrors(CONTROLLERS.getUserByUserId))
-
-// GET: check if user exists using email address
-router.get('/validUser', adminAuth, catchErrors(CONTROLLERS.isUserValid))
-
-// GET: get all users using offset and limit
-router.get('/getAllUsers', adminAuth, catchErrors(CONTROLLERS.getAllUsers))
-
-// GET: get login details
-router.get(
-    '/logindetails/:userId',
-    adminAuth,
-    catchErrors(CONTROLLERS.getLoginDetails)
-)
-
-// PUT: update user data
-router.put('/update/:type', allAuth, catchErrors(CONTROLLERS.updateUser))
+// PUT: update user details
+router.put('/update', allAuth, catchErrors(updateUser));
 
 // DELETE: delete user
-router.delete('/delete', allAuth, catchErrors(CONTROLLERS.deleteUser))
+router.delete('/delete', allAuth, catchErrors(deleteUser));
 
-module.exports = router
+// GET: check if username is valid
+router.get('/verify-username', allAuth, catchErrors(verifyUsername));
+
+export default router;

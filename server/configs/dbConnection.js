@@ -1,35 +1,30 @@
-// import modules
-const mongoose = require('mongoose')
+// importing libraries
+import mongoose from 'mongoose';
 
-// import environment variables
-const { NODE_ENV, MONGO_URI } = require('./index')
+// import configs
+import CONFIG from './config.js';
 
 // set mongoose to debug in development environment
-if (NODE_ENV === 'development') mongoose.set('debug', true)
+if (CONFIG.NODE_ENV === 'development')
+    mongoose.set('debug', true);
 
-/**
- * function to connect mongoDB database
- *
- * @param { void }
- *
- * @return { void }
- */
-
-function connectDatabase() {
+// function to connect mongoDB database
+function connectDB() {
     try {
-        // connect using MONGO URI
-        mongoose
-            .connect(MONGO_URI, {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-            })
-            .then(() => {
-                console.log('MongoDB is connected!')
-            })
-    } catch (err) {
-        console.error(err)
+        mongoose.connect(CONFIG.MONGO_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+
+        const db = mongoose.connection;
+        db.on('error', console.error.bind(console, 'Database connection Error: '));
+        db.once('open', () => {
+            console.log('Database connection is successful!');
+        });
+    }
+    catch (err) {
+        console.error(err);
     }
 }
 
-// call connection function
-connectDatabase()
+export default connectDB;
