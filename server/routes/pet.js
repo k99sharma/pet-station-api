@@ -43,5 +43,4 @@ router.delete('/delete/:petId', allAuth, catchErrors(deletePet));
 // GET: get owner Id
 router.get('/get-owner-id/:petId', allAuth, catchErrors(getOwnerId));
 
-
 export default router;

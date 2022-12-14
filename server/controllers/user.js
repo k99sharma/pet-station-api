@@ -49,7 +49,8 @@ export async function getUserByUID(req, res) {
         email: user.email,
         phoneNumber: user.phoneNumber,
         address: user.address,
-        gender: user.gender
+        gender: user.gender,
+        petAdoptionRequest: user.petAdoptionRequest
     };
 
     return sendSuccess(

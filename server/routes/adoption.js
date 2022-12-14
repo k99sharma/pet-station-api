@@ -10,7 +10,9 @@ import {
     completeAdoption,
     getAdoptionRecord,
     getPetAvailableForAdoption,
-    deleteAdoptionStatus
+    deleteAdoptionStatus,
+    sendAdoptionRequestForPet,
+    cancelAdoptionRequestForPet
 } from '../controllers/adoption.js';
 
 // importing middleware
@@ -26,6 +28,7 @@ const router = express.Router();
  * get all adoption record of user
  * remove pet from adoption
  * complete adoption
+ * send adoption request for pet
  * 
  */
 
@@ -43,5 +46,11 @@ router.get('/get-all-pets', allAuth, catchErrors(getPetAvailableForAdoption));
 
 // DELETE: delete pet for adoption
 router.delete('/delete/:petId', allAuth, catchErrors(deleteAdoptionStatus));
+
+// POST: send adoption request for pet
+router.post('/request-adoption/:petId', allAuth, catchErrors(sendAdoptionRequestForPet));
+
+// POST: cancel adoption request for pet
+router.post('/cancel-adoption-request/:petId', allAuth, catchErrors(cancelAdoptionRequestForPet));
 
 export default router;
