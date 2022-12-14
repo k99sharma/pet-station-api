@@ -43,6 +43,9 @@ const petSchema = new Schema({
         type: String,
         required: true
     },
+    adoptionRequest: {
+        type: Array
+    },
     adoptionStatus: {
         type: String,
         default: 'none',

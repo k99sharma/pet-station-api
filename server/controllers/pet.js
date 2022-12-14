@@ -137,7 +137,8 @@ export async function getAllUserPets(req, res) {
 
     // user pets
     let pets = await Promise.all(locker);
-    pets = pets.map(pet => {
+
+    pets = pets.filter(pet => pet !== null).map(pet => {
         const mappedData = {
             petId: pet.UID,
             name: pet.name,
@@ -148,6 +149,7 @@ export async function getAllUserPets(req, res) {
             ownerId: pet.ownerId,
             age: pet.age,
             weight: pet.weight,
+            adoptionRequest: pet.adoptionRequest,
             adoptionStatus: pet.adoptionStatus
         }
 

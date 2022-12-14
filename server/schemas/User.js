@@ -64,6 +64,9 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
+    petAdoptionRequest: {
+        type: Array
+    },
     active: {
         type: Boolean,
         default: true
