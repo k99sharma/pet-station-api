@@ -266,7 +266,7 @@ export async function deleteAdoptionStatus(req, res) {
     const { petId } = req.params;
 
     // updating pet adoption status
-    await Pet.findOneAndUpdate({ petId }, {
+    await Pet.findOneAndUpdate({ UID: petId }, {
         adoptionStatus: 'none'
     })
         .then(() => {
