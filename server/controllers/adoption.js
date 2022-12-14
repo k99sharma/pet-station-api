@@ -20,7 +20,7 @@ export async function putPetOnAdoption(req, res) {
     const { petId } = req.params;
 
     // set pet adoption status to pending
-    Pet.findOneAndUpdate({ userId }, {
+    Pet.findOneAndUpdate({ petId }, {
         adoptionStatus: 'pending'
     })
         .then(() => {
