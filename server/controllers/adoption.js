@@ -9,9 +9,6 @@ import User from '../schemas/User.js';
 // importing response format
 import { sendError, sendSuccess } from '../utilities/errorHelper.js';
 
-// importing helper functions
-// import { decrypt, encrypt } from '../utilities/helper.js';
-
 // importing status codes
 import statusCodes from '../utilities/statusCodes.js';
 
@@ -137,7 +134,7 @@ export async function completeAdoption(req, res) {
 export async function getAdoptionRecord(req, res) {
     const { userId } = req.user;
 
-    const adoptionRecord = await Adoption.find({ userId });
+    const adoptionRecord = await Adoption.find({ userId } || { adoptedBy: userId });
 
     if (adoptionRecord.length === 0)
         return sendSuccess(
@@ -165,105 +162,30 @@ export async function getAdoptionRecord(req, res) {
 
 // get all pets available for adoption
 export async function getPetAvailableForAdoption(req, res) {
-    // // paging parameters
-    // const limit = parseInt(req.query.limit, 10);
-    // const { cursor } = req.query;
-
-    // // response data holder
-    // let petsForAdoption = [];
-
-    // // if cursor is present
-    // if (cursor) {
-    //     // decrypt the cursor
-    //     const decryptedCursor = decrypt(cursor);
-
-    //     // convert into date value
-    //     const decryptedDate = new Date(decryptedCursor * 1000);
-
-    //     // query for users according to cursor
-    //     petsForAdoption = await Pet.find({
-    //         createdAt: {
-    //             $lt: decryptedDate
-    //         }
-    //     })
-    //         .sort({ createdAt: -1 })
-    //         .limit(limit + 1)
-    // } else {
-    //     petsForAdoption = await Pet.find({})
-    //         .sort({ createdAt: -1 })
-    //         .limit(limit + 1)
-    // }
-
-    // // checking if there are more documents
-    // const hasMore = petsForAdoption.length === limit + 1;   // boolean value
-    // let nextCursor = null;
-
-    // // if limit is reached
-    // if (hasMore) {
-    //     const nextCursorRecord = petsForAdoption[limit];
-
-    //     const unixTimestamp = Math.floor(
-    //         nextCursorRecord.createdAt.getTime() / 1000
-    //     );
-
-    //     nextCursor = encrypt(unixTimestamp.toString());
-
-    //     // removing last record from data
-    //     petsForAdoption.pop();
-    // }
-
-
-    // // mapping data to return as response
-    // petsForAdoption = petsForAdoption.map(pet => {
-    //     const mappedData = {
-    //         petId: pet.UID,
-    //         name: pet.name,
-    //         description: pet.description,
-    //         imageUrl: pet.imageUrl,
-    //         category: pet.category,
-    //         breed: pet.breed,
-    //         ownerId: pet.ownerId,
-    //         age: pet.age,
-    //         weight: pet.weight,
-    //         adoptionStatus: pet.adoptionStatus
-    //     };
-
-    //     return mappedData;
-    // });
-
-    // // if no pet is present
-    // if (petsForAdoption.length === 0)
-    //     return sendSuccess(
-    //         res,
-    //         statusCodes.OK,
-    //         {
-    //             msg: 'No pets for adoption.',
-    //             count: 0,
-    //             data: []
-    //         },
-    //         'success'
-    //     );
-
-
-    // return sendSuccess(
-    //     res,
-    //     statusCodes.OK,
-    //     {
-    //         msg: 'Pet available for adoption.',
-    //         count: petsForAdoption.length,
-    //         data: petsForAdoption,
-    //         paging: {
-    //             hasMore,
-    //             nextCursor
-    //         }
-    //     },
-    //     'success'
-    // );
+    const { userId } = req.user;
 
     // getting all pets available for adoption
-    const pets = await Pet.find({
+    let pets = await Pet.find({
         adoptionStatus: 'pending'
     });
+
+    pets = pets.filter(pet => pet.ownerId !== userId).map(pet => {
+        const mappedPet = {
+            petId: pet.UID,
+            name: pet.name,
+            description: pet.description,
+            imageUrl: pet.imageUrl,
+            category: pet.category,
+            breed: pet.breed,
+            ownerId: pet.ownerId,
+            age: pet.age,
+            weight: pet.weight,
+            adoptionRequest: pet.adoptionRequest,
+            adoptionStatus: pet.adoptionStatus
+        }
+
+        return mappedPet;
+    })
 
     // if no pets is available
     if (!pets)
