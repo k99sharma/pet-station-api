@@ -10,7 +10,7 @@ import User from '../schemas/User.js';
 import { sendError, sendSuccess } from '../utilities/errorHelper.js';
 
 // importing helper functions
-import { decrypt, encrypt } from '../utilities/helper.js';
+// import { decrypt, encrypt } from '../utilities/helper.js';
 
 // importing status codes
 import statusCodes from '../utilities/statusCodes.js';
@@ -165,100 +165,128 @@ export async function getAdoptionRecord(req, res) {
 
 // get all pets available for adoption
 export async function getPetAvailableForAdoption(req, res) {
-    // paging parameters
-    const limit = parseInt(req.query.limit, 10);
-    const { cursor } = req.query;
+    // // paging parameters
+    // const limit = parseInt(req.query.limit, 10);
+    // const { cursor } = req.query;
 
-    // response data holder
-    let petsForAdoption = [];
+    // // response data holder
+    // let petsForAdoption = [];
 
-    // if cursor is present
-    if (cursor) {
-        // decrypt the cursor
-        const decryptedCursor = decrypt(cursor);
+    // // if cursor is present
+    // if (cursor) {
+    //     // decrypt the cursor
+    //     const decryptedCursor = decrypt(cursor);
 
-        // convert into date value
-        const decryptedDate = new Date(decryptedCursor * 1000);
+    //     // convert into date value
+    //     const decryptedDate = new Date(decryptedCursor * 1000);
 
-        // query for users according to cursor
-        petsForAdoption = await Pet.find({
-            createdAt: {
-                $lt: decryptedDate
-            }
-        })
-            .sort({ createdAt: -1 })
-            .limit(limit + 1)
-    } else {
-        petsForAdoption = await Pet.find({})
-            .sort({ createdAt: -1 })
-            .limit(limit + 1)
-    }
+    //     // query for users according to cursor
+    //     petsForAdoption = await Pet.find({
+    //         createdAt: {
+    //             $lt: decryptedDate
+    //         }
+    //     })
+    //         .sort({ createdAt: -1 })
+    //         .limit(limit + 1)
+    // } else {
+    //     petsForAdoption = await Pet.find({})
+    //         .sort({ createdAt: -1 })
+    //         .limit(limit + 1)
+    // }
 
-    // checking if there are more documents
-    const hasMore = petsForAdoption.length === limit + 1;   // boolean value
-    let nextCursor = null;
+    // // checking if there are more documents
+    // const hasMore = petsForAdoption.length === limit + 1;   // boolean value
+    // let nextCursor = null;
 
-    // if limit is reached
-    if (hasMore) {
-        const nextCursorRecord = petsForAdoption[limit];
+    // // if limit is reached
+    // if (hasMore) {
+    //     const nextCursorRecord = petsForAdoption[limit];
 
-        const unixTimestamp = Math.floor(
-            nextCursorRecord.createdAt.getTime() / 1000
-        );
+    //     const unixTimestamp = Math.floor(
+    //         nextCursorRecord.createdAt.getTime() / 1000
+    //     );
 
-        nextCursor = encrypt(unixTimestamp.toString());
+    //     nextCursor = encrypt(unixTimestamp.toString());
 
-        // removing last record from data
-        petsForAdoption.pop();
-    }
+    //     // removing last record from data
+    //     petsForAdoption.pop();
+    // }
 
 
-    // mapping data to return as response
-    petsForAdoption = petsForAdoption.map(pet => {
-        const mappedData = {
-            petId: pet.UID,
-            name: pet.name,
-            description: pet.description,
-            imageUrl: pet.imageUrl,
-            category: pet.category,
-            breed: pet.breed,
-            ownerId: pet.ownerId,
-            age: pet.age,
-            weight: pet.weight,
-            adoptionStatus: pet.adoptionStatus
-        };
+    // // mapping data to return as response
+    // petsForAdoption = petsForAdoption.map(pet => {
+    //     const mappedData = {
+    //         petId: pet.UID,
+    //         name: pet.name,
+    //         description: pet.description,
+    //         imageUrl: pet.imageUrl,
+    //         category: pet.category,
+    //         breed: pet.breed,
+    //         ownerId: pet.ownerId,
+    //         age: pet.age,
+    //         weight: pet.weight,
+    //         adoptionStatus: pet.adoptionStatus
+    //     };
 
-        return mappedData;
+    //     return mappedData;
+    // });
+
+    // // if no pet is present
+    // if (petsForAdoption.length === 0)
+    //     return sendSuccess(
+    //         res,
+    //         statusCodes.OK,
+    //         {
+    //             msg: 'No pets for adoption.',
+    //             count: 0,
+    //             data: []
+    //         },
+    //         'success'
+    //     );
+
+
+    // return sendSuccess(
+    //     res,
+    //     statusCodes.OK,
+    //     {
+    //         msg: 'Pet available for adoption.',
+    //         count: petsForAdoption.length,
+    //         data: petsForAdoption,
+    //         paging: {
+    //             hasMore,
+    //             nextCursor
+    //         }
+    //     },
+    //     'success'
+    // );
+
+    // getting all pets available for adoption
+    const pets = await Pet.find({
+        adoptionStatus: 'pending'
     });
 
-    // if no pet is present
-    if (petsForAdoption.length === 0)
+    // if no pets is available
+    if (!pets)
         return sendSuccess(
             res,
             statusCodes.OK,
             {
-                msg: 'No pets for adoption.',
-                count: 0,
-                data: []
+                msg: 'No pet is available.',
+                pets: []
             },
             'success'
         );
-
 
     return sendSuccess(
         res,
         statusCodes.OK,
         {
-            msg: 'Pet available for adoption.',
-            count: petsForAdoption.length,
-            data: petsForAdoption,
-            paging: {
-                hasMore,
-                nextCursor
-            }
+            msg: 'Pet adoption',
+            count: pets.length,
+            pets
         },
         'success'
-    );
+    )
 }
 
 // remove pet from adoption
