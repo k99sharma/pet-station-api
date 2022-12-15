@@ -8,6 +8,7 @@ import { catchErrors } from '../configs/errorHandlers.js';
 import {
     createNewPet,
     getAllUserPets,
+    getAllUserPetsForAdoption,
     getPet,
     deletePet,
     getOwnerId
@@ -23,6 +24,7 @@ const router = express.Router();
  * 
  * Create new pet
  * get all user pets using user Id
+ * get all user pets for adoption using user Id
  * get pet using UID
  * delete pet using pet UID
  * get owner Id
@@ -33,6 +35,9 @@ router.post('/create', allAuth, catchErrors(createNewPet));
 
 // GET: get all user pets using user Id
 router.get('/get-all', allAuth, catchErrors(getAllUserPets));
+
+// GET: get all user pets for adoption using userId
+router.get('/get-all-adoption', allAuth, catchErrors(getAllUserPetsForAdoption));
 
 //  GET: get pet using UID
 router.get('/get/:petId', allAuth, catchErrors(getPet));

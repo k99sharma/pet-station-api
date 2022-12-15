@@ -171,6 +171,70 @@ export async function getAllUserPets(req, res) {
     );
 }
 
+// get all adoption pets
+export async function getAllUserPetsForAdoption(req, res) {
+    // getting user Id
+    const { userId } = req.user;
+
+    // finding locker
+    const petLocker = await PetLocker.findOne({ userId });
+
+    // if locker is not present or locker is empty
+    if (!petLocker || petLocker.locker.length === 0)
+        return sendSuccess(
+            res,
+            statusCodes.OK,
+            {
+                msg: 'No available pets.',
+                data: {
+                    count: 0,
+                    pets: []
+                }
+            }
+        );
+
+    // getting all pets from id
+    const locker = petLocker.locker.map(id => Pet.findOne({ UID: id }));
+
+    // user pets
+    let pets = await Promise.all(locker);
+
+    // get available pets for adoption
+    pets = pets
+        .filter(pet => pet !== null)
+        .filter(pet => pet.adoptionStatus === 'pending')
+        .map(pet => {
+            const mappedData = {
+                petId: pet.UID,
+                name: pet.name,
+                description: pet.description,
+                imageUrl: pet.imageUrl,
+                category: pet.category,
+                breed: pet.breed,
+                ownerId: pet.ownerId,
+                age: pet.age,
+                weight: pet.weight,
+                adoptionRequest: pet.adoptionRequest,
+                adoptionStatus: pet.adoptionStatus
+            }
+
+            return mappedData;
+        });
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        {
+            msg: 'Available pets.',
+            data: {
+                count: pets.length,
+                pets
+            }
+        },
+        'success'
+    );
+}
+
 // get pet using UID
 export async function getPet(req, res) {
     const { petId } = req.params;
