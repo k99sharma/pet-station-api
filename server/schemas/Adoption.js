@@ -9,11 +9,7 @@ const adoptionSchema = new Schema({
         type: String,
         required: true
     },
-    adoptedBy: {
-        type: String,
-        required: true
-    },
-    pet: {
+    contract: {
         type: String,
         required: true
     },

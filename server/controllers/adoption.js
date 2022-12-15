@@ -4,6 +4,7 @@
 // import AdoptionLocker from '../schemas/AdoptionLocker.js';
 import Adoption from '../schemas/Adoption.js';
 import Pet from '../schemas/Pet.js';
+import PetLocker from '../schemas/PetLocker.js';
 import User from '../schemas/User.js';
 
 // importing response format
@@ -48,69 +49,73 @@ export async function completeAdoption(req, res) {
         userWhoAdoptedPet
     } = req.body;
 
+    let data = [];
+    data.push(Pet.findOne({ UID: petId }));
+    data.push(User.findOne({ UID: userId }));
+    data.push(User.findOne({ UID: userWhoAdoptedPet }));
+
+    data = await Promise.all(data);
+
     // delete pet from user pet locker
     Pet.findOneAndDelete({ UID: petId })
         .then(() => {
-            console.log('Pet is deleted from user locker');
+            console.log('Pet is deleted');
         })
         .catch(err => {
             console.error(err);
-            console.log('Pet cannot be deleted from user locker');
+            console.log('Pet cannot be deleted');
         })
 
     // remove pet Id from pet and user adoption array
-    Pet.findOneAndUpdate({
-        UID: petId
+    PetLocker.findOneAndUpdate({
+        userId
     }, {
         $pull: {
-            adoptionRequest: userId
+            locker: petId
         }
-    },
-        {
-            upsert: true
-        })
-        .then(() => {
-            User.findOneAndUpdate({
-                UID: userId
-            }, {
-                $pull: {
-                    petAdoptionRequest: petId
-                }
-            })
-                .then(() => sendSuccess(
-                    res,
-                    statusCodes.OK,
-                    'Adoption request is cancelled.',
-                    'success'
-                ))
-                .catch(err => {
-                    console.error(err);
-
-                    return sendError(
-                        res,
-                        statusCodes.SERVER_ERROR,
-                        'Adoption request is not cancelled.',
-                        'error'
-                    );
-                })
-        })
+    })
+        .then(() => console.log('Pet is removed from locker.'))
         .catch(err => {
             console.error(err);
 
             return sendError(
                 res,
                 statusCodes.SERVER_ERROR,
-                'Adoption request is not cancelled.',
+                'Pet cannot be removed from locker.',
                 'error'
             );
         })
 
 
+    User.findOneAndUpdate({
+        UID: userWhoAdoptedPet
+    }, {
+        $pull: {
+            petAdoptionRequest: petId
+        }
+    })
+        .then(() => console.log('Adoption request is removed.'))
+        .catch(err => {
+            console.error(err);
+
+            return sendError(
+                res,
+                statusCodes.SERVER_ERROR,
+                'Adoption request cannot be removed.',
+                'error'
+            );
+        })
+
+    const contract = JSON.stringify({
+        user: data[1],
+        pet: data[0],
+        adoptedBy: data[2]
+    });
+
     // creating new adoption required
     const adoption = new Adoption({
         userId,
-        petId,
-        adoptedBy: userWhoAdoptedPet
+        contract
     });
 
     adoption.save()
