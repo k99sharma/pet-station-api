@@ -134,7 +134,7 @@ export async function completeAdoption(req, res) {
 export async function getAdoptionRecord(req, res) {
     const { userId } = req.user;
 
-    const adoptionRecord = await Adoption.find({ userId } || { adoptedBy: userId });
+    const adoptionRecord = await Adoption.find({ userId });
 
     if (adoptionRecord.length === 0)
         return sendSuccess(
