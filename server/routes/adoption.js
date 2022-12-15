@@ -12,7 +12,8 @@ import {
     getPetAvailableForAdoption,
     deleteAdoptionStatus,
     sendAdoptionRequestForPet,
-    cancelAdoptionRequestForPet
+    cancelAdoptionRequestForPet,
+    getAdoptionRequests
 } from '../controllers/adoption.js';
 
 // importing middleware
@@ -43,6 +44,9 @@ router.get('/record', allAuth, catchErrors(getAdoptionRecord));
 
 // GET: all pets available for adoption
 router.get('/get-all-pets', allAuth, catchErrors(getPetAvailableForAdoption));
+
+// GET: get adoption requests using pet Id
+router.get('/get/pet-adoption-request/:petId', allAuth, catchErrors(getAdoptionRequests));
 
 // DELETE: delete pet for adoption
 router.delete('/delete/:petId', allAuth, catchErrors(deleteAdoptionStatus));
