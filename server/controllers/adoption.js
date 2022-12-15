@@ -289,6 +289,53 @@ export async function getPetAvailableForAdoption(req, res) {
     )
 }
 
+// get adoption requests of user
+export async function getAdoptionRequests(req, res) {
+    // params
+    const { petId } = req.params;
+
+    const pet = await Pet.findOne({ UID: petId });
+
+    let requests = pet.adoptionRequest;   // requests
+
+    if (requests.length === 0)
+        return sendSuccess(
+            res,
+            statusCodes.OK,
+            {
+                msg: 'No available requests.',
+                count: 0,
+                requests: []
+            },
+            'success'
+        );
+
+    requests = requests.map(requestId => User.findOne({ UID: requestId }));
+
+    requests = await Promise.all(requests);
+
+    requests = requests.map(user => {
+        const mappedData = {
+            userId: user.UID,
+            profilePictureUrl: user.profilePictureUrl,
+            name: `${user.firstName} ${user.lastName}`
+        }
+
+        return mappedData;
+    });
+
+    return sendSuccess(
+        res,
+        statusCodes.OK,
+        {
+            msg: 'Available requests.',
+            count: requests.length,
+            requests
+        },
+        'success'
+    );
+}
+
 // remove pet from adoption
 export async function deleteAdoptionStatus(req, res) {
     const { petId } = req.params;
