@@ -21,7 +21,7 @@ export default function socketMiddleware(io) {
         const { sessionID, username } = socket.handshake.query;
 
         // if session ID is present
-        if (sessionID !== null) {
+        if (sessionID !== '') {
             // getting session
             const sessionData = await sessionStore.getSession(sessionID);
 
