@@ -9,7 +9,12 @@ import socketMiddleware from './middleware.js';
 import socketEvent from './event.js';
 
 export default function socketServer(server) {
-    const io = new Server(server);  // socket server
+    const io = new Server(server, {
+        cors: {
+            origin: "http://localhost:3000",
+            methods: ["GET", "POST"]
+         }
+    });  // socket server
 
     // middleware
     socketMiddleware(io);
