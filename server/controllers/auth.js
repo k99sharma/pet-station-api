@@ -29,7 +29,7 @@ export async function signup(req, res) {
         password
     } = req.body;
 
-    // if user already exists 
+    // if user already exists
     const isAvailable = await User.findOne({ email });
     if (isAvailable)
         return sendError(
