@@ -11,7 +11,7 @@ import socketEvent from './event.js';
 export default function socketServer(server) {
     const io = new Server(server, {
         cors: {
-            origin: "http://localhost:3000",
+            origin: "https://petstation.netlify.app",
             methods: ["GET", "POST"]
         }
     });  // socket server
