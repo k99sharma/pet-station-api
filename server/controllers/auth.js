@@ -6,6 +6,7 @@ import bcryptjs from 'bcryptjs';
 // importing schemas
 import User from '../schemas/User.js';
 import Username from '../schemas/Username.js';
+import Friend from '../schemas/Friend.js';
 
 // importing status codes
 import statusCodes from '../utilities/statusCodes.js';
@@ -69,6 +70,18 @@ export async function signup(req, res) {
                     console.error(err);
                     console.log('Username cannot be set.');
                 })
+
+            const friends = new Friend({
+                UID: data.UID
+            });
+
+            friends.save()
+            .then(()=>{
+                console.log('Friend array is added.')
+            })
+            .catch(err => {
+                console.error(err);
+            })
         })
         .catch(err => {
             console.log('User cannot be saved.')
