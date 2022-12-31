@@ -235,6 +235,27 @@ export async function addFriend(req, res) {
           'error'
         );
       });
+
+    friendList = await Friend.findOne({ UID: friendId });
+    Friend.findOneAndUpdate(
+      { UID: friendId },
+      {
+        friends: [...friendList.friends, userId]
+      }
+    )
+      .then(() => {
+        console.log('Friend is added');
+      })
+      .catch((err) => {
+        console.error(err);
+
+        return sendError(
+          res,
+          statusCodes.SERVER_ERROR,
+          'Friend cannot be added',
+          'error'
+        );
+      });
   }
 
   return sendSuccess(res, statusCodes.OK, 'Friend is added', 'success');
@@ -264,8 +285,6 @@ export async function getFriends(req, res) {
   );
 
   friends = await Promise.all(friends);
-
-  console.log(friends);
 
   friends = friends.map((friend) => {
     const mappedFriend = {
