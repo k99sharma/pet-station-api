@@ -1,0 +1,23 @@
+{
+  "name": "pet-station-api",
+  "version": "1.0.0",
+  "description": "Pet station API",
+  "main": "index.js",
+  "repository": "https://github.com/k99sharma/pet-station-api.git",
+  "author": "Kalash Sharma <kalash.strt@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon index.js | npx pino-pretty"
+  },
+  "type": "module",
+  "dependencies": {
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "helmet": "^6.0.1",
+    "pino": "^8.11.0",
+    "pino-pretty": "^10.0.0"
+  }
+}
