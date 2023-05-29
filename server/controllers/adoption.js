@@ -40,6 +40,41 @@ export async function putPetOnAdoption(req, res) {
     );
 }
 
+// sentimental analysis
+// todo: to be added
+// async function analyzeSentiment(text) {
+//   const model = await use.load();
+//   const embeddings = await model.embed([text]);
+//   const predictions = await model.predict(embeddings);
+//   const sentimentScore = predictions.arraySync()[0][0]; // Assuming positive sentiment at index 0
+//   return sentimentScore;
+// }
+
+// async function matchPets(friendliness, maintenanceCost, activeness, destructiveness, sentimentThreshold) {
+//   const collection = await connectToDB();
+
+//   // Query to match pets based on parameter ranges and sentiment score
+//   const query = {
+//     friendliness: { $lte: friendliness },
+//     maintenanceCost: { $lte: maintenanceCost },
+//     activeness: { $lte: activeness },
+//     destructiveness: { $lte: destructiveness }
+//   };
+    
+//     const matchedPets = await collection.find(query).toArray();
+    
+//      const filteredPets = await Promise.all(matchedPets.map(async pet => {
+//     const sentimentScore = await analyzeSentiment(pet.description);
+//     pet.sentimentScore = sentimentScore;
+//     return pet;
+//   }));
+
+//   // Return pets with sentiment score above the threshold
+//   const finalPets = filteredPets.filter(pet => pet.sentimentScore > sentimentThreshold);
+
+//   return finalPets;
+// }
+
 // adopt pet
 export async function completeAdoption(req, res) {
     const { userId } = req.user;
